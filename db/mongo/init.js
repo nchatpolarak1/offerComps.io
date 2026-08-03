@@ -8,11 +8,11 @@ if (existingCollections.indexOf('offer_perks') === -1) {
     print('collection offer_perks already exists');
 }
 
-// One perk document per offer
+// one perk document per offer
 db.offer_perks.createIndex({ Oid: 1 }, { unique: true, name: 'uq_offer_perks_Oid' });
 db.offer_perks.createIndex({ Uid: 1 }, { name: 'idx_offer_perks_Uid' });
 
-// offer_files, uploaded offer letters.
+// uploaded offer letters
 if (existingCollections.indexOf('offer_files') === -1) {
     db.createCollection('offer_files');
     print('created collection offer_files');
@@ -20,7 +20,7 @@ if (existingCollections.indexOf('offer_files') === -1) {
     print('collection offer_files already exists');
 }
 
-// An offer can have more than one file, so this index is not unique.
+// an offer can have several files, so not unique
 db.offer_files.createIndex({ Oid: 1 }, { name: 'idx_offer_files_Oid' });
 db.offer_files.createIndex({ Uid: 1 }, { name: 'idx_offer_files_Uid' });
 

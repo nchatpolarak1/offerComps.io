@@ -1,0 +1,215 @@
+:root {
+    --page-background: #eef1f6;
+    --panel-background: #ffffff;
+    --border-color: #d4d9e2;
+    --text-color: #1f2733;
+    --muted-text: #5f6b7c;
+    --accent-color: #2c4a7c;
+    --accent-hover: #1f3760;
+    --error-color: #b3261e;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: var(--page-background);
+    color: var(--text-color);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 16px;
+}
+
+h1,
+h2 {
+    margin: 0;
+}
+
+/* login and signup cards */
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.card {
+    width: 100%;
+    max-width: 380px;
+    padding: 32px;
+    background-color: var(--panel-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(31, 39, 51, 0.08);
+}
+
+.card-title {
+    font-size: 22px;
+    text-align: center;
+}
+
+.card-subtitle {
+    margin: 8px 0 24px 0;
+    color: var(--muted-text);
+    font-size: 14px;
+    text-align: center;
+}
+
+.card-links {
+    margin: 12px 0 0 0;
+    color: var(--muted-text);
+    font-size: 14px;
+    text-align: center;
+}
+
+.card-links a {
+    color: var(--accent-color);
+}
+
+/* form fields */
+
+.field {
+    display: block;
+    margin-bottom: 16px;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.field input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 15px;
+    font-family: inherit;
+}
+
+.field input:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: -1px;
+}
+
+.button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.button.primary {
+    width: 100%;
+    background-color: var(--accent-color);
+    color: #ffffff;
+}
+
+.button.primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.error {
+    margin: 0 0 16px 0;
+    color: var(--error-color);
+    font-size: 14px;
+}
+
+/* pages shown after logging in */
+
+.app-page {
+    min-height: 100vh;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background-color: var(--accent-color);
+    color: #ffffff;
+}
+
+.app-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.app-nav a,
+.app-nav .link-button {
+    margin-left: 20px;
+    color: #ffffff;
+    font-size: 15px;
+    text-decoration: none;
+}
+
+.app-nav a:hover,
+.app-nav .link-button:hover {
+    text-decoration: underline;
+}
+
+.link-button {
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.link-button:disabled {
+    opacity: 0.6;
+    cursor: default;
+    text-decoration: none;
+}
+
+.app-main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.greeting {
+    margin: 0 0 20px 0;
+    color: var(--muted-text);
+}
+
+.panel {
+    padding: 24px;
+    background-color: var(--panel-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.panel-header h2 {
+    font-size: 18px;
+}
+
+.panel-header .button.primary {
+    width: auto;
+}
+
+.empty {
+    margin: 0;
+    padding: 32px 0;
+    color: var(--muted-text);
+    text-align: center;
+}

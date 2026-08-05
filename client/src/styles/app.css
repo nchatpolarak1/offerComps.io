@@ -83,16 +83,20 @@ h2 {
     font-weight: bold;
 }
 
-.field input {
+.field input,
+.field select {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
+    background-color: var(--panel-background);
+    color: var(--text-color);
     font-size: 15px;
     font-family: inherit;
 }
 
-.field input:focus {
+.field input:focus,
+.field select:focus {
     outline: 2px solid var(--accent-color);
     outline-offset: -1px;
 }
@@ -294,4 +298,84 @@ h2 {
 
 .button.danger:hover {
     background-color: #f6e0de;
+}
+
+/* the add-offer form */
+
+.form-page {
+    max-width: 700px;
+}
+
+.step-hint {
+    color: var(--muted-text);
+    font-size: 14px;
+}
+
+/* two or three fields sharing one line */
+.field-row {
+    display: flex;
+    gap: 16px;
+}
+
+.field-row .field {
+    flex: 1;
+}
+
+.perk-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.perk-name {
+    font-size: 15px;
+}
+
+.perk-row input,
+.perk-row select {
+    width: 220px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--panel-background);
+    color: var(--text-color);
+    font-size: 15px;
+    font-family: inherit;
+}
+
+.custom-perk {
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.button.secondary {
+    background-color: var(--panel-background);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.button.secondary:hover {
+    background-color: var(--page-background);
+}
+
+/* links that are drawn as buttons */
+a.button {
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+}
+
+.form-actions .button.primary {
+    width: auto;
 }

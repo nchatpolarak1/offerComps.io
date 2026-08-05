@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import SignupForm from './pages/SignupForm';
 import OffersPage from './pages/OffersPage';
+import OfferForm from './pages/OfferForm';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -16,6 +17,14 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <OffersPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/offers/new"
+                element={
+                    <ProtectedRoute>
+                        <OfferForm />
                     </ProtectedRoute>
                 }
             />

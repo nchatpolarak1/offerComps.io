@@ -61,9 +61,7 @@ function OffersPage() {
                 <span className="app-title">Job Offer Comparison Tool</span>
                 <nav className="app-nav">
                     <Link to="/offers">Home</Link>
-                    <button type="button" className="link-button" disabled>
-                        New Offer
-                    </button>
+                    <Link to="/offers/new">New Offer</Link>
                     <button type="button" className="link-button" onClick={onLogOut}>
                         Log Out
                     </button>
@@ -76,9 +74,9 @@ function OffersPage() {
                 <section className="panel">
                     <div className="panel-header">
                         <h2>My Offers</h2>
-                        <button type="button" className="button primary" disabled>
+                        <Link to="/offers/new" className="button primary">
                             + New Offer
-                        </button>
+                        </Link>
                     </div>
 
                     {errorMessage !== '' && <p className="error">{errorMessage}</p>}

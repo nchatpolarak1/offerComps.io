@@ -41,9 +41,10 @@ function isValidDate(value) {
     return !isNaN(parsed.getTime());
 }
 
+// null means the request left perks out, not the same as sending none
 function validatePerks(rawPerks, errors) {
     if (rawPerks === undefined || rawPerks === null) {
-        return [];
+        return null;
     }
 
     if (!Array.isArray(rawPerks)) {
@@ -258,13 +259,34 @@ async function list(req, res, next) {
     }
 }
 
+// a bad id is treated as a missing offer rather than a separate error
+function readOfferId(req) {
+    const offerId = Number(req.params.offerId);
+
+    if (isNaN(offerId)) {
+        throw httpError(404, 'That offer was not found.');
+    }
+    return offerId;
+}
+
+// validates the body and confirms the chosen city exists
+async function readOfferValues(body) {
+    const checked = validateOffer(body);
+    if (checked.errors.length > 0) {
+        throw httpError(400, checked.errors[0]);
+    }
+
+    const city = await cityRepository.findById(checked.values.cityId);
+    if (city === null) {
+        throw httpError(400, 'That city was not found.');
+    }
+
+    return checked.values;
+}
+
 async function get(req, res, next) {
     try {
-        const offerId = Number(req.params.offerId);
-        if (isNaN(offerId)) {
-            throw httpError(404, 'That offer was not found.');
-        }
-
+        const offerId = readOfferId(req);
         const offer = await offerService.getOffer(req.user.userId, offerId);
         res.json({ offer: offer });
     } catch (error) {
@@ -274,18 +296,30 @@ async function get(req, res, next) {
 
 async function create(req, res, next) {
     try {
-        const checked = validateOffer(req.body);
-        if (checked.errors.length > 0) {
-            throw httpError(400, checked.errors[0]);
-        }
-
-        const city = await cityRepository.findById(checked.values.cityId);
-        if (city === null) {
-            throw httpError(400, 'That city was not found.');
-        }
-
-        const offer = await offerService.createOffer(req.user.userId, checked.values);
+        const values = await readOfferValues(req.body);
+        const offer = await offerService.createOffer(req.user.userId, values);
         res.status(201).json({ offer: offer });
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function update(req, res, next) {
+    try {
+        const offerId = readOfferId(req);
+        const values = await readOfferValues(req.body);
+        const offer = await offerService.updateOffer(req.user.userId, offerId, values);
+        res.json({ offer: offer });
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function remove(req, res, next) {
+    try {
+        const offerId = readOfferId(req);
+        await offerService.deleteOffer(req.user.userId, offerId);
+        res.json({ message: 'Offer deleted.' });
     } catch (error) {
         next(error);
     }
@@ -295,5 +329,7 @@ module.exports = {
     list: list,
     get: get,
     create: create,
+    update: update,
+    remove: remove,
     validateOffer: validateOffer
 };

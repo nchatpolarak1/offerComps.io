@@ -60,6 +60,34 @@ async function insert(offer) {
     return result.insertId;
 }
 
+async function update(offer) {
+    const sql =
+        'UPDATE offer SET company_id = ?, city_id = ?, job_title = ?, job_level = ?, ' +
+        'base_salary = ?, signing_bonus = ?, annual_bonus_pct = ?, equity_type = ?, ' +
+        'equity_total_value = ?, equity_vest_years = ?, equity_cliff_months = ?, ' +
+        'expected_hours_week = ?, work_arrangement = ?, offer_status = ?, deadline_date = ? ' +
+        'WHERE offer_id = ?';
+    const params = [
+        offer.companyId,
+        offer.cityId,
+        offer.jobTitle,
+        offer.jobLevel,
+        offer.baseSalary,
+        offer.signingBonus,
+        offer.annualBonusPct,
+        offer.equityType,
+        offer.equityTotalValue,
+        offer.equityVestYears,
+        offer.equityCliffMonths,
+        offer.expectedHoursWeek,
+        offer.workArrangement,
+        offer.offerStatus,
+        offer.deadlineDate,
+        offer.offerId
+    ];
+    await mysqlPool.query(sql, params);
+}
+
 async function remove(offerId) {
     const sql = 'DELETE FROM offer WHERE offer_id = ?';
     await mysqlPool.query(sql, [offerId]);
@@ -69,5 +97,6 @@ module.exports = {
     findByUser: findByUser,
     findById: findById,
     insert: insert,
+    update: update,
     remove: remove
 };

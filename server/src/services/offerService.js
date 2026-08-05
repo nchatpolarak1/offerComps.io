@@ -65,14 +65,18 @@ async function listOffers(userId) {
     return offers;
 }
 
-// the same "not found" either way, so one user cannot probe another's offer ids
-async function getOffer(userId, offerId) {
+// "not found" either way, so one user cannot probe another's offer ids
+async function requireOwnedRow(userId, offerId) {
     const row = await offerRepository.findById(offerId);
 
     if (row === null || row.user_id !== userId) {
         throw httpError(404, 'That offer was not found.');
     }
+    return row;
+}
 
+async function getOffer(userId, offerId) {
+    const row = await requireOwnedRow(userId, offerId);
     const perks = await perksRepository.findByOffer(offerId);
     return toPublicOffer(row, perks);
 }
@@ -99,10 +103,15 @@ async function createOffer(userId, details) {
         deadlineDate: details.deadlineDate
     });
 
+    let perks = details.perks;
+    if (perks === null) {
+        perks = [];
+    }
+
     // the two databases are not in one transaction, so a failed perks write
     // takes the MySQL row back out instead of leaving half an offer behind
     try {
-        await perksRepository.upsert(offerId, userId, details.perks);
+        await perksRepository.upsert(offerId, userId, perks);
     } catch (error) {
         await offerRepository.remove(offerId);
         throw error;
@@ -111,9 +120,52 @@ async function createOffer(userId, details) {
     return await getOffer(userId, offerId);
 }
 
+async function updateOffer(userId, offerId, details) {
+    await requireOwnedRow(userId, offerId);
+
+    const company = await companyRepository.findOrCreate(details.companyName);
+
+    await offerRepository.update({
+        offerId: offerId,
+        companyId: company.companyId,
+        cityId: details.cityId,
+        jobTitle: details.jobTitle,
+        jobLevel: details.jobLevel,
+        baseSalary: details.baseSalary,
+        signingBonus: details.signingBonus,
+        annualBonusPct: details.annualBonusPct,
+        equityType: details.equityType,
+        equityTotalValue: details.equityTotalValue,
+        equityVestYears: details.equityVestYears,
+        equityCliffMonths: details.equityCliffMonths,
+        expectedHoursWeek: details.expectedHoursWeek,
+        workArrangement: details.workArrangement,
+        offerStatus: details.offerStatus,
+        deadlineDate: details.deadlineDate
+    });
+
+    // leaving perks out of the request keeps the ones already saved, so the
+    // compensation step can be edited on its own
+    if (details.perks !== null) {
+        await perksRepository.upsert(offerId, userId, details.perks);
+    }
+
+    return await getOffer(userId, offerId);
+}
+
+// MongoDB has no foreign key into MySQL, so the perks document is deleted here
+async function deleteOffer(userId, offerId) {
+    await requireOwnedRow(userId, offerId);
+
+    await offerRepository.remove(offerId);
+    await perksRepository.deleteByOffer(offerId);
+}
+
 module.exports = {
     listOffers: listOffers,
     getOffer: getOffer,
     createOffer: createOffer,
+    updateOffer: updateOffer,
+    deleteOffer: deleteOffer,
     toPublicOffer: toPublicOffer
 };

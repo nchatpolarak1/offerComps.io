@@ -21,5 +21,7 @@ router.get('/cities', authMiddleware.requireSession, cityController.list);
 router.get('/offers', authMiddleware.requireSession, offerController.list);
 router.post('/offers', authMiddleware.requireSession, offerController.create);
 router.get('/offers/:offerId', authMiddleware.requireSession, offerController.get);
+router.put('/offers/:offerId', authMiddleware.requireSession, offerController.update);
+router.delete('/offers/:offerId', authMiddleware.requireSession, offerController.remove);
 
 module.exports = router;

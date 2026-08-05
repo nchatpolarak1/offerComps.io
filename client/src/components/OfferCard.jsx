@@ -1,0 +1,55 @@
+// one row in the "My Offers" list
+
+function formatMoney(amount) {
+    return '$' + amount.toLocaleString('en-US');
+}
+
+function OfferCard({ offer, onDelete, busy }) {
+    const location = offer.cityName + ', ' + offer.stateCode;
+
+    let perkSummary = 'No perks saved';
+    if (offer.perks.length === 1) {
+        perkSummary = '1 perk';
+    } else if (offer.perks.length > 1) {
+        perkSummary = offer.perks.length + ' perks';
+    }
+
+    function onDeleteClick() {
+        const message =
+            'Delete the ' + offer.jobTitle + ' offer from ' + offer.companyName + '?';
+        if (window.confirm(message)) {
+            onDelete(offer.offerId);
+        }
+    }
+
+    return (
+        <li className="offer-row">
+            <div className="offer-main">
+                <span className="offer-company">{offer.companyName}</span>
+                <span className="offer-title">{offer.jobTitle}</span>
+                <span className="offer-meta">
+                    {location} &middot; {offer.workArrangement} &middot;{' '}
+                    {offer.expectedHoursWeek} hrs/week &middot; {perkSummary}
+                </span>
+            </div>
+
+            <div className="offer-side">
+                <span className="offer-salary">{formatMoney(offer.baseSalary)}</span>
+                <span className={'status-badge status-' + offer.offerStatus}>
+                    {offer.offerStatus}
+                </span>
+            </div>
+
+            <button
+                type="button"
+                className="button danger"
+                onClick={onDeleteClick}
+                disabled={busy}
+            >
+                Delete
+            </button>
+        </li>
+    );
+}
+
+export default OfferCard;

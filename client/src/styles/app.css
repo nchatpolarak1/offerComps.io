@@ -213,3 +213,85 @@ h2 {
     color: var(--muted-text);
     text-align: center;
 }
+
+/* the offers list */
+
+.offer-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.offer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.offer-main {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.offer-company {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.offer-title {
+    font-size: 15px;
+}
+
+.offer-meta {
+    color: var(--muted-text);
+    font-size: 13px;
+}
+
+.offer-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.offer-salary {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.status-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    background-color: var(--page-background);
+    color: var(--muted-text);
+    font-size: 12px;
+    text-transform: capitalize;
+}
+
+.status-accepted {
+    background-color: #dff0e2;
+    color: #1e5b2e;
+}
+
+.status-declined,
+.status-expired {
+    background-color: #f6e0de;
+    color: var(--error-color);
+}
+
+.button.danger {
+    background-color: var(--panel-background);
+    border: 1px solid var(--border-color);
+    color: var(--error-color);
+}
+
+.button.danger:hover {
+    background-color: #f6e0de;
+}

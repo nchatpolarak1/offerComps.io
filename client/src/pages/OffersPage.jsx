@@ -1,12 +1,55 @@
 // the page shown after logging in
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import apiClient from '../services/apiClient';
+import OfferCard from '../components/OfferCard';
 
 function OffersPage() {
     const auth = useAuth();
-    const [offers] = useState([]);
+    const [offers, setOffers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [deletingId, setDeletingId] = useState(0);
+
+    async function loadOffers() {
+        setLoading(true);
+        setErrorMessage('');
+
+        try {
+            const data = await apiClient.get('/offers');
+            setOffers(data.offers);
+        } catch (error) {
+            setErrorMessage(error.message);
+        }
+
+        setLoading(false);
+    }
+
+    useEffect(function () {
+        loadOffers();
+    }, []);
+
+    async function onDelete(offerId) {
+        setDeletingId(offerId);
+        setErrorMessage('');
+
+        try {
+            await apiClient.del('/offers/' + offerId);
+            const remaining = [];
+            for (let i = 0; i < offers.length; i++) {
+                if (offers[i].offerId !== offerId) {
+                    remaining.push(offers[i]);
+                }
+            }
+            setOffers(remaining);
+        } catch (error) {
+            setErrorMessage(error.message);
+        }
+
+        setDeletingId(0);
+    }
 
     async function onLogOut() {
         await auth.logout();
@@ -38,8 +81,27 @@ function OffersPage() {
                         </button>
                     </div>
 
-                    {offers.length === 0 && (
+                    {errorMessage !== '' && <p className="error">{errorMessage}</p>}
+
+                    {loading && <p className="empty">Loading your offers...</p>}
+
+                    {!loading && offers.length === 0 && (
                         <p className="empty">You have not added any offers yet.</p>
+                    )}
+
+                    {!loading && offers.length > 0 && (
+                        <ul className="offer-list">
+                            {offers.map(function (offer) {
+                                return (
+                                    <OfferCard
+                                        key={offer.offerId}
+                                        offer={offer}
+                                        onDelete={onDelete}
+                                        busy={deletingId === offer.offerId}
+                                    />
+                                );
+                            })}
+                        </ul>
                     )}
                 </section>
             </main>

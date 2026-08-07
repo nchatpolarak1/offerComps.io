@@ -8,7 +8,7 @@ const MIN_OFFERS = 2;
 const MAX_OFFERS = 6;
 
 const WEIGHT_NAMES = ['pay', 'commute', 'hours', 'flexibility'];
-const DEFAULT_WEIGHTS = { pay: 0.55, commute: 0.15, hours: 0.2, flexibility: 0.1 };
+const DEFAULT_WEIGHTS = { pay: 0.5, commute: 0.2, hours: 0.2, flexibility: 0.1 };
 
 function cleanText(value) {
     if (typeof value !== 'string') {

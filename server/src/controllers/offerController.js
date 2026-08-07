@@ -294,6 +294,16 @@ async function get(req, res, next) {
     }
 }
 
+async function breakdown(req, res, next) {
+    try {
+        const offerId = readOfferId(req);
+        const details = await offerService.getBreakdown(req.user.userId, offerId);
+        res.json({ breakdown: details });
+    } catch (error) {
+        next(error);
+    }
+}
+
 async function create(req, res, next) {
     try {
         const values = await readOfferValues(req.body);
@@ -328,6 +338,7 @@ async function remove(req, res, next) {
 module.exports = {
     list: list,
     get: get,
+    breakdown: breakdown,
     create: create,
     update: update,
     remove: remove,

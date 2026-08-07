@@ -3,6 +3,8 @@
 const offerRepository = require('../repositories/offerRepository');
 const companyRepository = require('../repositories/companyRepository');
 const perksRepository = require('../repositories/perksRepository');
+const cityRepository = require('../repositories/cityRepository');
+const taxService = require('./taxService');
 const { httpError } = require('../middleware/errorHandler');
 
 // mysql2 hands DECIMAL columns back as strings, so money is converted here
@@ -153,6 +155,60 @@ async function updateOffer(userId, offerId, details) {
     return await getOffer(userId, offerId);
 }
 
+// first-year gross: the signing bonus only lands once, so this is year one
+function grossFor(row) {
+    const baseSalary = toNumber(row.base_salary);
+    const signingBonus = toNumber(row.signing_bonus);
+    const annualBonus = (baseSalary * toNumber(row.annual_bonus_pct)) / 100;
+    let equityPerYear = 0;
+
+    if (row.equity_type === 'RSU' && row.equity_vest_years > 0) {
+        equityPerYear = toNumber(row.equity_total_value) / row.equity_vest_years;
+    }
+
+    return {
+        baseSalary: baseSalary,
+        signingBonus: signingBonus,
+        annualBonus: annualBonus,
+        equityPerYear: equityPerYear,
+        total: baseSalary + signingBonus + annualBonus + equityPerYear
+    };
+}
+
+// perks are worth money but are not wages, so they are reported on their own
+function perksValueOf(perks) {
+    let total = 0;
+
+    for (let i = 0; i < perks.length; i++) {
+        if (perks[i].annualValue !== null && perks[i].annualValue !== undefined) {
+            total = total + perks[i].annualValue;
+        }
+    }
+    return total;
+}
+
+async function getBreakdown(userId, offerId) {
+    const row = await requireOwnedRow(userId, offerId);
+    const city = await cityRepository.findById(row.city_id);
+    const perks = await perksRepository.findByOffer(offerId);
+
+    const gross = grossFor(row);
+    const taxes = await taxService.takeHome(gross.total, row.state_code, taxService.TAX_YEAR);
+
+    return {
+        offerId: row.offer_id,
+        taxYear: taxService.TAX_YEAR,
+        stateCode: row.state_code,
+        gross: gross,
+        federalTax: taxes.federalTax,
+        stateTax: taxes.stateTax,
+        takeHome: taxes.takeHome,
+        colIndex: city.colIndex,
+        colAdjustedTakeHome: taxService.colAdjust(taxes.takeHome, city.colIndex),
+        perksValue: perksValueOf(perks)
+    };
+}
+
 // MongoDB has no foreign key into MySQL, so the perks document is deleted here
 async function deleteOffer(userId, offerId) {
     await requireOwnedRow(userId, offerId);
@@ -167,5 +223,6 @@ module.exports = {
     createOffer: createOffer,
     updateOffer: updateOffer,
     deleteOffer: deleteOffer,
+    getBreakdown: getBreakdown,
     toPublicOffer: toPublicOffer
 };

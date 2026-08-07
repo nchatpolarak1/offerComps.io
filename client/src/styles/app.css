@@ -533,3 +533,19 @@ a.button {
 .score-part-value {
     color: var(--muted-text);
 }
+
+/* the charts */
+
+.chart-panel {
+    margin-top: 20px;
+}
+
+.chart-panel h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+}
+
+/* the canvas sizes itself to this, so it needs a real height */
+.chart-box {
+    height: 320px;
+}

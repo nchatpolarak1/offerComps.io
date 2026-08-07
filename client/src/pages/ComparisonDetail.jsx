@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import apiClient from '../services/apiClient';
 import chartColors from '../components/chartColors';
+import ScoreRadarChart from '../components/ScoreRadarChart';
+import PayBreakdownChart from '../components/PayBreakdownChart';
 
 const WEIGHT_NAMES = ['pay', 'commute', 'hours', 'flexibility'];
 const WEIGHT_LABELS = {
@@ -310,6 +312,20 @@ function ComparisonDetail() {
                                     );
                                 })}
                             </div>
+
+                            <section className="panel chart-panel">
+                                <h3>Score by category</h3>
+                                <div className="chart-box">
+                                    <ScoreRadarChart scores={scores} offerIds={offerIds} />
+                                </div>
+                            </section>
+
+                            <section className="panel chart-panel">
+                                <h3>First-year pay: taxes and take-home</h3>
+                                <div className="chart-box">
+                                    <PayBreakdownChart scores={scores} />
+                                </div>
+                            </section>
                         </div>
                     </div>
                 )}

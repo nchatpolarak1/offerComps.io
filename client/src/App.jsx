@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import SignupForm from './pages/SignupForm';
 import OffersPage from './pages/OffersPage';
 import OfferForm from './pages/OfferForm';
+import ComparisonsPage from './pages/ComparisonsPage';
+import ComparisonForm from './pages/ComparisonForm';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -25,6 +27,22 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <OfferForm />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/comparisons"
+                element={
+                    <ProtectedRoute>
+                        <ComparisonsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/comparisons/new"
+                element={
+                    <ProtectedRoute>
+                        <ComparisonForm />
                     </ProtectedRoute>
                 }
             />

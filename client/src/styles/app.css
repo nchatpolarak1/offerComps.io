@@ -379,3 +379,36 @@ a.button {
 .form-actions .button.primary {
     width: auto;
 }
+
+/* the offer checkboxes on the compare screen */
+
+.pick-list {
+    margin: 6px 0 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pick-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.pick-row:hover {
+    background-color: var(--page-background);
+}
+
+.pick-main {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pick-row .offer-salary {
+    margin-left: auto;
+}

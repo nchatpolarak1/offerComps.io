@@ -62,6 +62,7 @@ function OffersPage() {
                 <nav className="app-nav">
                     <Link to="/offers">Home</Link>
                     <Link to="/offers/new">New Offer</Link>
+                    <Link to="/comparisons">Comparisons</Link>
                     <button type="button" className="link-button" onClick={onLogOut}>
                         Log Out
                     </button>

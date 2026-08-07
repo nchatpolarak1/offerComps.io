@@ -7,6 +7,7 @@ import OffersPage from './pages/OffersPage';
 import OfferForm from './pages/OfferForm';
 import ComparisonsPage from './pages/ComparisonsPage';
 import ComparisonForm from './pages/ComparisonForm';
+import ComparisonDetail from './pages/ComparisonDetail';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -43,6 +44,14 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <ComparisonForm />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/comparisons/:comparisonId"
+                element={
+                    <ProtectedRoute>
+                        <ComparisonDetail />
                     </ProtectedRoute>
                 }
             />

@@ -117,9 +117,12 @@ function ComparisonsPage() {
                                 return (
                                     <li className="offer-row" key={comparison.comparisonId}>
                                         <div className="offer-main">
-                                            <span className="offer-company">
+                                            <Link
+                                                className="offer-company"
+                                                to={'/comparisons/' + comparison.comparisonId}
+                                            >
                                                 {comparison.comparisonName}
-                                            </span>
+                                            </Link>
                                             <span className="offer-meta">
                                                 {offerCountText(comparison)} &middot;{' '}
                                                 {topScoreText(comparison)}

@@ -1,9 +1,9 @@
-// one colour per offer, shared by the score cards and the charts
+// one color per offer, shared by the score cards and the charts
 
-const CHART_COLORS = ['#2c4a7c', '#b3261e', '#1e5b2e', '#8a5a00', '#5c3a7c', '#0f6b78'];
+const CHART_COLORS = ['#4b87e9', '#ff6b6b', '#46c2ad', '#8bc64e', '#dda1df', '#3bc1db'];
 
-// the colour follows the offer, not its rank, so a company keeps the same
-// colour when the ranking moves around
+// the color follows the offer, not its rank, so a company keeps the same
+// color when the ranking moves around
 function colorFor(offerIds, offerId) {
     let index = offerIds.indexOf(offerId);
 

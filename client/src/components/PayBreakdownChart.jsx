@@ -12,9 +12,9 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const TAKE_HOME_COLOR = '#1e5b2e';
-const FEDERAL_COLOR = '#b3261e';
-const STATE_COLOR = '#8a5a00';
+const TAKE_HOME_COLOR = '#8bc64e';
+const FEDERAL_COLOR = '#ff6b6b';
+const STATE_COLOR = '#dda1df';
 
 function formatMoney(amount) {
     return '$' + Math.round(amount).toLocaleString('en-US');

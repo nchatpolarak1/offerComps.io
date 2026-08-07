@@ -2,6 +2,7 @@ const express = require('express');
 const authController = require('../controllers/authController');
 const offerController = require('../controllers/offerController');
 const cityController = require('../controllers/cityController');
+const comparisonController = require('../controllers/comparisonController');
 const authMiddleware = require('../middleware/authMiddleware');
 const rateLimitMiddleware = require('../middleware/rateLimitMiddleware');
 
@@ -24,5 +25,11 @@ router.get('/offers/:offerId', authMiddleware.requireSession, offerController.ge
 router.get('/offers/:offerId/breakdown', authMiddleware.requireSession, offerController.breakdown);
 router.put('/offers/:offerId', authMiddleware.requireSession, offerController.update);
 router.delete('/offers/:offerId', authMiddleware.requireSession, offerController.remove);
+
+router.get('/comparisons', authMiddleware.requireSession, comparisonController.list);
+router.post('/comparisons', authMiddleware.requireSession, comparisonController.create);
+router.get('/comparisons/:comparisonId', authMiddleware.requireSession, comparisonController.get);
+router.put('/comparisons/:comparisonId', authMiddleware.requireSession, comparisonController.update);
+router.delete('/comparisons/:comparisonId', authMiddleware.requireSession, comparisonController.remove);
 
 module.exports = router;

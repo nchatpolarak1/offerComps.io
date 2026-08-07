@@ -1,0 +1,126 @@
+// named comparisons: the weights a user cares about and the offers they picked
+
+const comparisonRepository = require('../repositories/comparisonRepository');
+const offerRepository = require('../repositories/offerRepository');
+const offerService = require('./offerService');
+const { httpError } = require('../middleware/errorHandler');
+
+// mysql2 hands DECIMAL columns back as strings
+function toNumber(value) {
+    return Number(value);
+}
+
+function toPublicComparison(row, offerIds) {
+    return {
+        comparisonId: row.comparison_id,
+        comparisonName: row.comparison_name,
+        weights: {
+            pay: toNumber(row.w_pay),
+            commute: toNumber(row.w_commute),
+            hours: toNumber(row.w_hours),
+            flexibility: toNumber(row.w_flexibility)
+        },
+        offerIds: offerIds
+    };
+}
+
+// "not found" either way, so one user cannot probe another's comparison ids
+async function requireOwnedRow(userId, comparisonId) {
+    const row = await comparisonRepository.findById(comparisonId);
+
+    if (row === null || row.user_id !== userId) {
+        throw httpError(404, 'That comparison was not found.');
+    }
+    return row;
+}
+
+// a comparison may only point at offers the same user owns
+async function requireOwnedOffers(userId, offerIds) {
+    for (let i = 0; i < offerIds.length; i++) {
+        const row = await offerRepository.findById(offerIds[i]);
+
+        if (row === null || row.user_id !== userId) {
+            throw httpError(400, 'One of the chosen offers was not found.');
+        }
+    }
+}
+
+async function listComparisons(userId) {
+    const rows = await comparisonRepository.findByUser(userId);
+    const comparisons = [];
+
+    for (let i = 0; i < rows.length; i++) {
+        const offerIds = await comparisonRepository.findOfferIds(rows[i].comparison_id);
+        comparisons.push(toPublicComparison(rows[i], offerIds));
+    }
+
+    return comparisons;
+}
+
+// the detail view needs the offers themselves, not just their ids
+async function getComparison(userId, comparisonId) {
+    const row = await requireOwnedRow(userId, comparisonId);
+    const offerIds = await comparisonRepository.findOfferIds(comparisonId);
+    const comparison = toPublicComparison(row, offerIds);
+    const offers = [];
+
+    for (let i = 0; i < offerIds.length; i++) {
+        offers.push(await offerService.getOffer(userId, offerIds[i]));
+    }
+
+    comparison.offers = offers;
+    return comparison;
+}
+
+async function createComparison(userId, details) {
+    await requireOwnedOffers(userId, details.offerIds);
+
+    const comparisonId = await comparisonRepository.insert({
+        userId: userId,
+        comparisonName: details.comparisonName,
+        wPay: details.weights.pay,
+        wCommute: details.weights.commute,
+        wHours: details.weights.hours,
+        wFlexibility: details.weights.flexibility
+    });
+
+    // the comparison row is taken back out if the picked offers cannot be saved
+    try {
+        await comparisonRepository.setOffers(comparisonId, details.offerIds);
+    } catch (error) {
+        await comparisonRepository.remove(comparisonId);
+        throw error;
+    }
+
+    return await getComparison(userId, comparisonId);
+}
+
+async function updateComparison(userId, comparisonId, details) {
+    await requireOwnedRow(userId, comparisonId);
+    await requireOwnedOffers(userId, details.offerIds);
+
+    await comparisonRepository.update({
+        comparisonId: comparisonId,
+        comparisonName: details.comparisonName,
+        wPay: details.weights.pay,
+        wCommute: details.weights.commute,
+        wHours: details.weights.hours,
+        wFlexibility: details.weights.flexibility
+    });
+    await comparisonRepository.setOffers(comparisonId, details.offerIds);
+
+    return await getComparison(userId, comparisonId);
+}
+
+async function deleteComparison(userId, comparisonId) {
+    await requireOwnedRow(userId, comparisonId);
+    await comparisonRepository.remove(comparisonId);
+}
+
+module.exports = {
+    listComparisons: listComparisons,
+    getComparison: getComparison,
+    createComparison: createComparison,
+    updateComparison: updateComparison,
+    deleteComparison: deleteComparison
+};

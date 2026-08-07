@@ -29,6 +29,7 @@ router.delete('/offers/:offerId', authMiddleware.requireSession, offerController
 router.get('/comparisons', authMiddleware.requireSession, comparisonController.list);
 router.post('/comparisons', authMiddleware.requireSession, comparisonController.create);
 router.get('/comparisons/:comparisonId', authMiddleware.requireSession, comparisonController.get);
+router.get('/comparisons/:comparisonId/scores', authMiddleware.requireSession, comparisonController.scores);
 router.put('/comparisons/:comparisonId', authMiddleware.requireSession, comparisonController.update);
 router.delete('/comparisons/:comparisonId', authMiddleware.requireSession, comparisonController.remove);
 

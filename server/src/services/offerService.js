@@ -4,6 +4,8 @@ const offerRepository = require('../repositories/offerRepository');
 const companyRepository = require('../repositories/companyRepository');
 const perksRepository = require('../repositories/perksRepository');
 const cityRepository = require('../repositories/cityRepository');
+const comparisonRepository = require('../repositories/comparisonRepository');
+const scoreCache = require('../repositories/scoreCache');
 const taxService = require('./taxService');
 const { httpError } = require('../middleware/errorHandler');
 
@@ -65,6 +67,16 @@ async function listOffers(userId) {
     }
 
     return offers;
+}
+
+// changing an offer changes every score it takes part in, so those cached
+// rankings are dropped rather than left to go stale until the TTL runs out
+async function clearCachedScores(offerId) {
+    const comparisonIds = await comparisonRepository.findComparisonIdsByOffer(offerId);
+
+    for (let i = 0; i < comparisonIds.length; i++) {
+        await scoreCache.invalidate(comparisonIds[i]);
+    }
 }
 
 // "not found" either way, so one user cannot probe another's offer ids
@@ -152,6 +164,8 @@ async function updateOffer(userId, offerId, details) {
         await perksRepository.upsert(offerId, userId, details.perks);
     }
 
+    await clearCachedScores(offerId);
+
     return await getOffer(userId, offerId);
 }
 
@@ -212,6 +226,10 @@ async function getBreakdown(userId, offerId) {
 // MongoDB has no foreign key into MySQL, so the perks document is deleted here
 async function deleteOffer(userId, offerId) {
     await requireOwnedRow(userId, offerId);
+
+    // the comparison_offer rows cascade away with the offer, so the affected
+    // comparisons have to be cleared while the links still exist
+    await clearCachedScores(offerId);
 
     await offerRepository.remove(offerId);
     await perksRepository.deleteByOffer(offerId);

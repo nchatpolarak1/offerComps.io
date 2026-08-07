@@ -158,6 +158,16 @@ async function get(req, res, next) {
     }
 }
 
+async function scores(req, res, next) {
+    try {
+        const comparisonId = readComparisonId(req);
+        const result = await comparisonService.getScores(req.user.userId, comparisonId);
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
 async function create(req, res, next) {
     try {
         const values = readComparisonValues(req.body);
@@ -196,6 +206,7 @@ async function remove(req, res, next) {
 module.exports = {
     list: list,
     get: get,
+    scores: scores,
     create: create,
     update: update,
     remove: remove,

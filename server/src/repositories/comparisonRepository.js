@@ -74,6 +74,19 @@ async function findOfferIds(comparisonId) {
     return offerIds;
 }
 
+// every comparison an offer appears in, so editing the offer can clear their
+// cached scores
+async function findComparisonIdsByOffer(offerId) {
+    const sql = 'SELECT comparison_id FROM comparison_offer WHERE offer_id = ?';
+    const rows = await mysqlPool.query(sql, [offerId]);
+    const comparisonIds = [];
+
+    for (let i = 0; i < rows.length; i++) {
+        comparisonIds.push(rows[i].comparison_id);
+    }
+    return comparisonIds;
+}
+
 // the whole picked list is replaced at once, so it runs in a transaction and a
 // failure part way through cannot leave a comparison holding half its offers
 async function setOffers(comparisonId, offerIds) {
@@ -109,5 +122,6 @@ module.exports = {
     update: update,
     remove: remove,
     findOfferIds: findOfferIds,
+    findComparisonIdsByOffer: findComparisonIdsByOffer,
     setOffers: setOffers
 };

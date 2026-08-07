@@ -2,7 +2,9 @@
 
 const comparisonRepository = require('../repositories/comparisonRepository');
 const offerRepository = require('../repositories/offerRepository');
+const scoreCache = require('../repositories/scoreCache');
 const offerService = require('./offerService');
+const scoringService = require('./scoringService');
 const { httpError } = require('../middleware/errorHandler');
 
 // mysql2 hands DECIMAL columns back as strings
@@ -51,10 +53,28 @@ async function listComparisons(userId) {
 
     for (let i = 0; i < rows.length; i++) {
         const offerIds = await comparisonRepository.findOfferIds(rows[i].comparison_id);
-        comparisons.push(toPublicComparison(rows[i], offerIds));
+        const comparison = toPublicComparison(rows[i], offerIds);
+
+        // free when the scores are already cached, null until they are computed
+        comparison.ranking = await scoreCache.readRanking(rows[i].comparison_id);
+        comparisons.push(comparison);
     }
 
     return comparisons;
+}
+
+async function getScores(userId, comparisonId) {
+    const comparison = await getComparison(userId, comparisonId);
+    const scores = await scoringService.score(userId, comparison.offers, comparison.weights);
+
+    await scoreCache.write(comparisonId, scores);
+
+    return {
+        comparisonId: comparisonId,
+        comparisonName: comparison.comparisonName,
+        weights: comparison.weights,
+        scores: scores
+    };
 }
 
 // the detail view needs the offers themselves, not just their ids
@@ -109,17 +129,22 @@ async function updateComparison(userId, comparisonId, details) {
     });
     await comparisonRepository.setOffers(comparisonId, details.offerIds);
 
+    // new weights or a different set of offers means the cached scores are stale
+    await scoreCache.invalidate(comparisonId);
+
     return await getComparison(userId, comparisonId);
 }
 
 async function deleteComparison(userId, comparisonId) {
     await requireOwnedRow(userId, comparisonId);
     await comparisonRepository.remove(comparisonId);
+    await scoreCache.invalidate(comparisonId);
 }
 
 module.exports = {
     listComparisons: listComparisons,
     getComparison: getComparison,
+    getScores: getScores,
     createComparison: createComparison,
     updateComparison: updateComparison,
     deleteComparison: deleteComparison

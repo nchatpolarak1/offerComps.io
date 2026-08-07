@@ -536,13 +536,29 @@ a.button {
 
 /* the charts */
 
-.chart-panel {
+.chart-panel,
+.insight-panel {
     margin-top: 20px;
 }
 
-.chart-panel h3 {
+.chart-panel h3,
+.insight-panel h3 {
     margin: 0 0 12px 0;
     font-size: 16px;
+}
+
+.insight-lead {
+    margin: 0 0 12px 0;
+}
+
+.insight-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.insight-list li {
+    margin-bottom: 8px;
+    line-height: 1.5;
 }
 
 /* the canvas sizes itself to this, so it needs a real height */

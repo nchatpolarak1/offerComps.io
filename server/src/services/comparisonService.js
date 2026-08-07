@@ -77,6 +77,21 @@ async function getScores(userId, comparisonId) {
     };
 }
 
+// the break-even figures do not depend on the weights, so the page asks for
+// them once instead of every time a slider moves
+async function getBreakEven(userId, comparisonId) {
+    const comparison = await getComparison(userId, comparisonId);
+    const result = await scoringService.breakEven(userId, comparison.offers);
+
+    return {
+        comparisonId: comparisonId,
+        comparisonName: comparison.comparisonName,
+        bestOfferId: result.bestOfferId,
+        bestCompanyName: result.bestCompanyName,
+        offers: result.offers
+    };
+}
+
 // the detail view needs the offers themselves, not just their ids
 async function getComparison(userId, comparisonId) {
     const row = await requireOwnedRow(userId, comparisonId);
@@ -145,6 +160,7 @@ module.exports = {
     listComparisons: listComparisons,
     getComparison: getComparison,
     getScores: getScores,
+    getBreakEven: getBreakEven,
     createComparison: createComparison,
     updateComparison: updateComparison,
     deleteComparison: deleteComparison

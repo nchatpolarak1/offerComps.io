@@ -168,6 +168,16 @@ async function scores(req, res, next) {
     }
 }
 
+async function breakEven(req, res, next) {
+    try {
+        const comparisonId = readComparisonId(req);
+        const result = await comparisonService.getBreakEven(req.user.userId, comparisonId);
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
 async function create(req, res, next) {
     try {
         const values = readComparisonValues(req.body);
@@ -207,6 +217,7 @@ module.exports = {
     list: list,
     get: get,
     scores: scores,
+    breakEven: breakEven,
     create: create,
     update: update,
     remove: remove,

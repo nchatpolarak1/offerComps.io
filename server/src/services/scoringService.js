@@ -8,6 +8,10 @@ const taxService = require('./taxService');
 // scale rather than a comparison between the offers
 const FLEXIBILITY_SCORES = { remote: 1.0, hybrid: 0.6, onsite: 0.3 };
 
+// no salary is worth searching past, and how many times the search halves
+const BREAK_EVEN_MAX_BASE = 5000000;
+const BREAK_EVEN_ROUNDS = 40;
+
 function flexibilityScore(workArrangement) {
     const score = FLEXIBILITY_SCORES[workArrangement];
 
@@ -130,6 +134,99 @@ async function score(userId, offers, weights) {
     return scores;
 }
 
+// the same pay maths measure() does, but with the base salary swapped out
+async function payValueAt(item, baseSalary) {
+    const gross = item.breakdown.gross;
+
+    // the bonus is a percentage of base, so it moves with the base salary
+    let bonusRate = 0;
+    if (gross.baseSalary > 0) {
+        bonusRate = gross.annualBonus / gross.baseSalary;
+    }
+
+    const total = baseSalary + baseSalary * bonusRate + gross.signingBonus + gross.equityPerYear;
+    const taxes = await taxService.takeHome(
+        total,
+        item.breakdown.stateCode,
+        item.breakdown.taxYear
+    );
+
+    return taxService.colAdjust(
+        taxes.takeHome + item.breakdown.perksValue,
+        item.breakdown.colIndex
+    );
+}
+
+// income tax is progressive, so there is no formula to turn round. this closes
+// in on the base salary that would make this offer worth as much as the target
+async function breakEvenBase(item, targetPayValue) {
+    if (item.payValue >= targetPayValue) {
+        return null;
+    }
+
+    const most = await payValueAt(item, BREAK_EVEN_MAX_BASE);
+    if (most < targetPayValue) {
+        return null;
+    }
+
+    let low = item.breakdown.gross.baseSalary;
+    let high = BREAK_EVEN_MAX_BASE;
+
+    for (let i = 0; i < BREAK_EVEN_ROUNDS; i++) {
+        const middle = (low + high) / 2;
+        const value = await payValueAt(item, middle);
+
+        if (value < targetPayValue) {
+            low = middle;
+        } else {
+            high = middle;
+        }
+    }
+
+    return Math.round(high);
+}
+
+// what each offer would have to pay to match the best-paying one. this is only
+// about money, so the weights do not come into it
+async function breakEven(userId, offers) {
+    const measured = [];
+
+    for (let i = 0; i < offers.length; i++) {
+        measured.push(await measure(userId, offers[i]));
+    }
+
+    let best = measured[0];
+    for (let i = 1; i < measured.length; i++) {
+        if (measured[i].payValue > best.payValue) {
+            best = measured[i];
+        }
+    }
+
+    const results = [];
+
+    for (let i = 0; i < measured.length; i++) {
+        const item = measured[i];
+        const neededBaseSalary = await breakEvenBase(item, best.payValue);
+
+        results.push({
+            offerId: item.offer.offerId,
+            companyName: item.offer.companyName,
+            cityName: item.offer.cityName,
+            stateCode: item.offer.stateCode,
+            baseSalary: item.breakdown.gross.baseSalary,
+            adjustedPay: round(item.payValue, 2),
+            neededBaseSalary: neededBaseSalary
+        });
+    }
+
+    return {
+        bestOfferId: best.offer.offerId,
+        bestCompanyName: best.offer.companyName,
+        offers: results
+    };
+}
+
 module.exports = {
-    score: score
+    score: score,
+    breakEven: breakEven
 };

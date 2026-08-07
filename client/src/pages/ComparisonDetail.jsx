@@ -6,6 +6,7 @@ import apiClient from '../services/apiClient';
 import chartColors from '../components/chartColors';
 import ScoreRadarChart from '../components/ScoreRadarChart';
 import PayBreakdownChart from '../components/PayBreakdownChart';
+import BreakEvenReadout from '../components/BreakEvenReadout';
 
 const WEIGHT_NAMES = ['pay', 'commute', 'hours', 'flexibility'];
 const WEIGHT_LABELS = {
@@ -127,6 +128,7 @@ function ComparisonDetail() {
     const [offerIds, setOfferIds] = useState([]);
     const [percents, setPercents] = useState(DEFAULT_PERCENTS);
     const [scores, setScores] = useState([]);
+    const [breakEven, setBreakEven] = useState(null);
     const [loading, setLoading] = useState(true);
     const [scoring, setScoring] = useState(false);
     const [weightsChanged, setWeightsChanged] = useState(false);
@@ -144,6 +146,13 @@ function ComparisonDetail() {
 
                 const result = await apiClient.get('/comparisons/' + comparisonId + '/scores');
                 setScores(result.scores);
+
+                // the break-even figures ignore the weights, so they are only
+                // asked for once
+                const insights = await apiClient.get(
+                    '/comparisons/' + comparisonId + '/breakeven'
+                );
+                setBreakEven(insights);
             } catch (error) {
                 setErrorMessage(error.message);
             }
@@ -326,6 +335,13 @@ function ComparisonDetail() {
                                     <PayBreakdownChart scores={scores} />
                                 </div>
                             </section>
+
+                            {breakEven !== null && (
+                                <section className="panel insight-panel">
+                                    <h3>Break-even</h3>
+                                    <BreakEvenReadout breakEven={breakEven} />
+                                </section>
+                            )}
                         </div>
                     </div>
                 )}

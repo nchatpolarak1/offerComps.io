@@ -30,6 +30,7 @@ router.get('/comparisons', authMiddleware.requireSession, comparisonController.l
 router.post('/comparisons', authMiddleware.requireSession, comparisonController.create);
 router.get('/comparisons/:comparisonId', authMiddleware.requireSession, comparisonController.get);
 router.get('/comparisons/:comparisonId/scores', authMiddleware.requireSession, comparisonController.scores);
+router.get('/comparisons/:comparisonId/breakeven', authMiddleware.requireSession, comparisonController.breakEven);
 router.put('/comparisons/:comparisonId', authMiddleware.requireSession, comparisonController.update);
 router.delete('/comparisons/:comparisonId', authMiddleware.requireSession, comparisonController.remove);
 

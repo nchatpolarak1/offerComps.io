@@ -134,8 +134,8 @@ async function score(userId, offers, weights) {
     return scores;
 }
 
-// the same pay maths measure() does, but with the base salary swapped out
-async function payValueAt(item, baseSalary) {
+// what this offer's whole first year would come to on a different base salary
+function grossAt(item, baseSalary) {
     const gross = item.breakdown.gross;
 
     // the bonus is a percentage of base, so it moves with the base salary
@@ -144,7 +144,12 @@ async function payValueAt(item, baseSalary) {
         bonusRate = gross.annualBonus / gross.baseSalary;
     }
 
-    const total = baseSalary + baseSalary * bonusRate + gross.signingBonus + gross.equityPerYear;
+    return baseSalary + baseSalary * bonusRate + gross.signingBonus + gross.equityPerYear;
+}
+
+// the same pay maths measure() does, but with the base salary swapped out
+async function payValueAt(item, baseSalary) {
+    const total = grossAt(item, baseSalary);
     const taxes = await taxService.takeHome(
         total,
         item.breakdown.stateCode,
@@ -155,6 +160,19 @@ async function payValueAt(item, baseSalary) {
         taxes.takeHome + item.breakdown.perksValue,
         item.breakdown.colIndex
     );
+}
+
+// how much of a raise would be swallowed by tax before any of it is take-home
+async function taxOnRaise(item, neededBaseSalary) {
+    const raisedGross = grossAt(item, neededBaseSalary);
+    const raised = await taxService.takeHome(
+        raisedGross,
+        item.breakdown.stateCode,
+        item.breakdown.taxYear
+    );
+
+    const taxNow = item.breakdown.federalTax + item.breakdown.stateTax;
+    return raised.federalTax + raised.stateTax - taxNow;
 }
 
 // income tax is progressive, so there is no formula to turn round. this closes
@@ -208,14 +226,30 @@ async function breakEven(userId, offers) {
         const item = measured[i];
         const neededBaseSalary = await breakEvenBase(item, best.payValue);
 
+        // the page shows the working, not just the answer
+        let raise = null;
+        let taxTakenFromRaise = null;
+
+        if (neededBaseSalary !== null) {
+            raise = neededBaseSalary - item.breakdown.gross.baseSalary;
+            taxTakenFromRaise = round(await taxOnRaise(item, neededBaseSalary), 2);
+        }
+
         results.push({
             offerId: item.offer.offerId,
             companyName: item.offer.companyName,
             cityName: item.offer.cityName,
             stateCode: item.offer.stateCode,
             baseSalary: item.breakdown.gross.baseSalary,
+            gross: item.breakdown.gross.total,
+            federalTax: round(item.breakdown.federalTax, 2),
+            stateTax: round(item.breakdown.stateTax, 2),
+            takeHome: round(item.breakdown.takeHome, 2),
+            colIndex: item.breakdown.colIndex,
             adjustedPay: round(item.payValue, 2),
-            neededBaseSalary: neededBaseSalary
+            neededBaseSalary: neededBaseSalary,
+            raise: raise,
+            taxOnRaise: taxTakenFromRaise
         });
     }
 

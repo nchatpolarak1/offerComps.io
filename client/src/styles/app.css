@@ -561,6 +561,35 @@ a.button {
     line-height: 1.5;
 }
 
+/* keeps a wide table inside the panel instead of stretching the page */
+.table-scroll {
+    overflow-x: auto;
+    margin-bottom: 16px;
+}
+
+.insight-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.insight-table th,
+.insight-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.insight-table th {
+    color: var(--muted-text);
+    font-size: 13px;
+}
+
+.insight-table .number {
+    text-align: right;
+}
+
 /* the canvas sizes itself to this, so it needs a real height */
 .chart-box {
     height: 320px;

@@ -21,7 +21,7 @@ function isFilledIn(value) {
     return value !== undefined && value !== null && value !== '';
 }
 
-// the weights are DECIMAL(3,2), and 0.55 + 0.15 + 0.2 + 0.1 is not exactly 1 in
+// the weights are 0.5 + 0.2 + 0.2 + 0.1 is not exactly 1 in
 // floating point, so they are rounded to cents before being added up
 function roundToCents(value) {
     return Math.round(value * 100) / 100;

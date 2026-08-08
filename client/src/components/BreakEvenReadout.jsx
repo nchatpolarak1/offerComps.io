@@ -1,12 +1,7 @@
-// what each offer would have to pay to match the best-paying one, and why
+// what each offer would have to pay to match the best-paying one
 
 function formatMoney(amount) {
     return '$' + Math.round(amount).toLocaleString('en-US');
-}
-
-// how much dearer this city is than the one the best-paying offer is in
-function costPercentMore(offer, best) {
-    return Math.round((offer.colIndex / best.colIndex - 1) * 100);
 }
 
 function BreakEvenReadout({ breakEven }) {
@@ -27,9 +22,8 @@ function BreakEvenReadout({ breakEven }) {
     return (
         <div>
             <p className="insight-lead">
-                <strong>{breakEven.bestCompanyName}</strong> pays the most once income tax and
-                the cost of living are taken out. The take-home figures are closer than the
-                adjusted ones, so most of the gap is the cost of living rather than the pay.
+                {breakEven.bestCompanyName} is worth the most once income tax and the cost of
+                living are taken out.
             </p>
 
             <div className="table-scroll">
@@ -37,15 +31,19 @@ function BreakEvenReadout({ breakEven }) {
                     <thead>
                         <tr>
                             <th>Offer</th>
-                            <th>Gross</th>
-                            <th>Tax</th>
                             <th>Take-home</th>
                             <th>Cost of living</th>
-                            <th>What it is worth</th>
+                            <th>Worth</th>
+                            <th>Needs base</th>
                         </tr>
                     </thead>
                     <tbody>
                         {breakEven.offers.map(function (offer) {
+                            let needsBase = '-';
+                            if (offer.neededBaseSalary !== null) {
+                                needsBase = formatMoney(offer.neededBaseSalary);
+                            }
+
                             return (
                                 <tr key={offer.offerId}>
                                     <td>
@@ -55,15 +53,10 @@ function BreakEvenReadout({ breakEven }) {
                                             {offer.cityName}, {offer.stateCode}
                                         </span>
                                     </td>
-                                    <td className="number">{formatMoney(offer.gross)}</td>
-                                    <td className="number">
-                                        {formatMoney(offer.federalTax + offer.stateTax)}
-                                    </td>
                                     <td className="number">{formatMoney(offer.takeHome)}</td>
                                     <td className="number">{offer.colIndex}</td>
-                                    <td className="number">
-                                        <strong>{formatMoney(offer.adjustedPay)}</strong>
-                                    </td>
+                                    <td className="number">{formatMoney(offer.adjustedPay)}</td>
+                                    <td className="number">{needsBase}</td>
                                 </tr>
                             );
                         })}
@@ -79,24 +72,8 @@ function BreakEvenReadout({ breakEven }) {
                 {behind.map(function (offer) {
                     return (
                         <li key={offer.offerId}>
-                            <strong>{offer.companyName}</strong> takes home{' '}
-                            {formatMoney(offer.takeHome)} against {best.companyName}&apos;s{' '}
-                            {formatMoney(best.takeHome)}.{' '}
-                            {offer.colIndex > best.colIndex && (
-                                <span>
-                                    {offer.cityName} costs about{' '}
-                                    <strong>{costPercentMore(offer, best)}% more</strong> to live
-                                    in than {best.cityName}, so{' '}
-                                </span>
-                            )}
-                            {offer.colIndex <= best.colIndex && <span>Adjusted for cost of living, </span>}
-                            that pay is worth {formatMoney(offer.adjustedPay)} next to{' '}
-                            {formatMoney(best.adjustedPay)}. To match it,{' '}
-                            {offer.companyName} would have to offer a base salary of{' '}
-                            <strong>{formatMoney(offer.neededBaseSalary)}</strong> &mdash;{' '}
-                            {formatMoney(offer.raise)} more than today, and about{' '}
-                            {formatMoney(offer.taxOnRaise)} of that raise would go straight to
-                            tax.
+                            {offer.companyName} needs {formatMoney(offer.raise)} more base pay to
+                            match {best.companyName}.
                         </li>
                     );
                 })}

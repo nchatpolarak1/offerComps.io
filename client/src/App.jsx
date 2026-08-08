@@ -32,6 +32,14 @@ function App() {
                 }
             />
             <Route
+                path="/offers/:offerId/edit"
+                element={
+                    <ProtectedRoute>
+                        <OfferForm />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
                 path="/comparisons"
                 element={
                     <ProtectedRoute>

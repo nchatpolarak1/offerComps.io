@@ -1,5 +1,7 @@
 // one row in the "My Offers" list
 
+import { Link } from 'react-router-dom';
+
 function formatMoney(amount) {
     return '$' + amount.toLocaleString('en-US');
 }
@@ -40,14 +42,19 @@ function OfferCard({ offer, onDelete, busy }) {
                 </span>
             </div>
 
-            <button
-                type="button"
-                className="button danger"
-                onClick={onDeleteClick}
-                disabled={busy}
-            >
-                Delete
-            </button>
+            <div className="offer-actions">
+                <Link to={'/offers/' + offer.offerId + '/edit'} className="button secondary">
+                    Edit
+                </Link>
+                <button
+                    type="button"
+                    className="button danger"
+                    onClick={onDeleteClick}
+                    disabled={busy}
+                >
+                    Delete
+                </button>
+            </div>
         </li>
     );
 }

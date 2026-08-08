@@ -265,6 +265,11 @@ h2 {
     margin-left: auto;
 }
 
+.offer-actions {
+    display: flex;
+    gap: 8px;
+}
+
 .offer-salary {
     font-size: 17px;
     font-weight: bold;

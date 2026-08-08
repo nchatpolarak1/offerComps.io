@@ -1,7 +1,8 @@
-// the two-step add-offer flow: compensation, then perks
+// the two-step offer flow: compensation, then perks. the same form adds a new
+// offer and edits a saved one
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import apiClient from '../services/apiClient';
 
 // the perk rows every offer starts with, as sketched in the prototype
@@ -24,9 +25,83 @@ function blankPresetValues() {
     return values;
 }
 
+// the API sends numbers and nulls, the inputs want strings
+function toFieldValue(value) {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    return String(value);
+}
+
+function findPresetIndex(perkName) {
+    for (let i = 0; i < PRESET_PERKS.length; i++) {
+        if (PRESET_PERKS[i].name === perkName) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// a saved perk goes back into the row it was entered in, and anything that is
+// not one of the preset rows goes back into the custom list
+function perksToRows(perks) {
+    const presetValues = blankPresetValues();
+    const customPerks = [];
+
+    for (let i = 0; i < perks.length; i++) {
+        const perk = perks[i];
+        const index = findPresetIndex(perk.name);
+
+        if (index === -1) {
+            customPerks.push({
+                name: perk.name,
+                category: perk.category,
+                annualValue: toFieldValue(perk.annualValue),
+                detail: toFieldValue(perk.detail)
+            });
+        } else if (PRESET_PERKS[index].inputType === 'money') {
+            presetValues[index] = toFieldValue(perk.annualValue);
+        } else {
+            presetValues[index] = toFieldValue(perk.detail);
+        }
+    }
+
+    return { presetValues: presetValues, customPerks: customPerks };
+}
+
+// every field has to be filled in, because saving replaces the whole offer and
+// anything left out would be wiped
+function offerToFields(offer) {
+    let deadlineDate = '';
+    if (offer.deadlineDate) {
+        deadlineDate = offer.deadlineDate.slice(0, 10);
+    }
+
+    return {
+        companyName: offer.companyName,
+        jobTitle: offer.jobTitle,
+        jobLevel: toFieldValue(offer.jobLevel),
+        cityId: toFieldValue(offer.cityId),
+        baseSalary: toFieldValue(offer.baseSalary),
+        signingBonus: toFieldValue(offer.signingBonus),
+        annualBonusPct: toFieldValue(offer.annualBonusPct),
+        equityType: offer.equityType,
+        equityTotalValue: toFieldValue(offer.equityTotalValue),
+        equityVestYears: toFieldValue(offer.equityVestYears),
+        equityCliffMonths: toFieldValue(offer.equityCliffMonths),
+        expectedHoursWeek: toFieldValue(offer.expectedHoursWeek),
+        workArrangement: offer.workArrangement,
+        offerStatus: offer.offerStatus,
+        deadlineDate: deadlineDate
+    };
+}
+
 function OfferForm() {
     const navigate = useNavigate();
+    const params = useParams();
+    const offerId = params.offerId;
     const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(true);
     const [cities, setCities] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
     const [saving, setSaving] = useState(false);
@@ -50,18 +125,32 @@ function OfferForm() {
     const [presetValues, setPresetValues] = useState(blankPresetValues());
     const [customPerks, setCustomPerks] = useState([]);
 
-    useEffect(function () {
-        async function loadCities() {
-            try {
-                const data = await apiClient.get('/cities');
-                setCities(data.cities);
-            } catch (error) {
-                setErrorMessage(error.message);
-            }
-        }
+    useEffect(
+        function () {
+            async function load() {
+                try {
+                    const data = await apiClient.get('/cities');
+                    setCities(data.cities);
 
-        loadCities();
-    }, []);
+                    if (offerId) {
+                        const saved = await apiClient.get('/offers/' + offerId);
+                        const rows = perksToRows(saved.offer.perks);
+
+                        setFields(offerToFields(saved.offer));
+                        setPresetValues(rows.presetValues);
+                        setCustomPerks(rows.customPerks);
+                    }
+                } catch (error) {
+                    setErrorMessage(error.message);
+                }
+
+                setLoading(false);
+            }
+
+            load();
+        },
+        [offerId]
+    );
 
     function updateField(name, value) {
         const updated = Object.assign({}, fields);
@@ -301,12 +390,24 @@ function OfferForm() {
 
         setSaving(true);
         try {
-            await apiClient.post('/offers', buildBody());
+            if (offerId) {
+                await apiClient.put('/offers/' + offerId, buildBody());
+            } else {
+                await apiClient.post('/offers', buildBody());
+            }
             navigate('/offers');
         } catch (error) {
             setErrorMessage(error.message);
             setSaving(false);
         }
+    }
+
+    let saveLabel = 'Add Offer';
+    if (offerId) {
+        saveLabel = 'Save changes';
+    }
+    if (saving) {
+        saveLabel = 'Saving...';
     }
 
     return (
@@ -327,7 +428,9 @@ function OfferForm() {
 
                     {errorMessage !== '' && <p className="error">{errorMessage}</p>}
 
-                    {step === 1 && (
+                    {loading && <p className="empty">Loading...</p>}
+
+                    {!loading && step === 1 && (
                         <form onSubmit={onNext}>
                             <label className="field">
                                 <span className="field-label">Company</span>
@@ -539,7 +642,7 @@ function OfferForm() {
                         </form>
                     )}
 
-                    {step === 2 && (
+                    {!loading && step === 2 && (
                         <form onSubmit={save}>
                             {PRESET_PERKS.map(function (preset, index) {
                                 return (
@@ -655,7 +758,7 @@ function OfferForm() {
                                     Back
                                 </button>
                                 <button type="submit" className="button primary" disabled={saving}>
-                                    {saving ? 'Saving...' : 'Add Offer'}
+                                    {saveLabel}
                                 </button>
                             </div>
                         </form>

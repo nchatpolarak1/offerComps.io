@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"Oid":{"$numberInt":"1"}},"name":"uq_offer_perks_Oid","unique":true},{"v":{"$numberInt":"2"},"key":{"Uid":{"$numberInt":"1"}},"name":"idx_offer_perks_Uid"}],"uuid":"307e56448a264581bdb39383e76345eb","collectionName":"offer_perks","type":"collection"}

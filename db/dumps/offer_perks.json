@@ -1,0 +1,46 @@
+[{
+	"_id": {
+		"$oid": "6a762708afd8156aca8063b8"
+	},
+	"Oid": 6,
+	"Uid": 2,
+	"perks": [
+		{
+			"name": "401k match",
+			"category": "retirement",
+			"annualValue": 5000,
+			"detail": null
+		},
+		{
+			"name": "PTO type",
+			"category": "PTO",
+			"annualValue": null,
+			"detail": "fixed days"
+		}
+	]
+},
+{
+	"_id": {
+		"$oid": "6a76277eafd8156aca8063b9"
+	},
+	"Oid": 7,
+	"Uid": 2,
+	"perks": []
+},
+{
+	"_id": {
+		"$oid": "6a763b4aafd8156aca8063ba"
+	},
+	"Oid": 8,
+	"Uid": 2,
+	"perks": []
+},
+{
+	"_id": {
+		"$oid": "6a7653f7afd8156aca8063bb"
+	},
+	"Oid": 9,
+	"Uid": 2,
+	"perks": []
+}]
+

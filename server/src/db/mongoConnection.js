@@ -1,4 +1,4 @@
-// shared MongoDB connection, holds offer_perks and offer_files
+// shared MongoDB connection, holds offer_perks
 
 const { MongoClient } = require('mongodb');
 const config = require('../config/env');

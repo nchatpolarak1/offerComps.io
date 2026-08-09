@@ -98,9 +98,6 @@ function LoginPage() {
                 </form>
 
                 <p className="card-links">
-                    <a href="#forgot-password">Forgot password?</a>
-                </p>
-                <p className="card-links">
                     Need an account? <Link to="/signup">Sign up</Link>
                 </p>
             </div>

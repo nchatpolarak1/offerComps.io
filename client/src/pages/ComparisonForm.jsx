@@ -17,7 +17,8 @@ function ComparisonForm() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [comparisonName, setComparisonName] = useState('');
     const [loading, setLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [formError, setFormError] = useState('');
     const [saving, setSaving] = useState(false);
 
     useEffect(function () {
@@ -40,7 +41,7 @@ function ComparisonForm() {
     }
 
     function onToggle(offerId) {
-        setErrorMessage('');
+        setFormError('');
 
         if (isSelected(offerId)) {
             const remaining = [];
@@ -54,7 +55,7 @@ function ComparisonForm() {
         }
 
         if (selectedIds.length >= MAX_OFFERS) {
-            setErrorMessage('A comparison can hold at most ' + MAX_OFFERS + ' offers.');
+            setFormError('A comparison can hold at most ' + MAX_OFFERS + ' offers.');
             return;
         }
 
@@ -65,22 +66,26 @@ function ComparisonForm() {
 
     // the server checks all of this again, this is just faster feedback
     function validate() {
+        const errors = {};
+
         if (comparisonName.trim() === '') {
-            setErrorMessage('Please name this comparison.');
-            return false;
+            errors.comparisonName = 'Please name this comparison.';
         }
         if (selectedIds.length < MIN_OFFERS) {
-            setErrorMessage('Choose at least ' + MIN_OFFERS + ' offers to compare.');
-            return false;
+            errors.offerIds = 'Choose at least ' + MIN_OFFERS + ' offers to compare.';
         }
-        return true;
+
+        return errors;
     }
 
     async function onSubmit(event) {
         event.preventDefault();
-        setErrorMessage('');
+        setFormError('');
 
-        if (!validate()) {
+        const errors = validate();
+        setFieldErrors(errors);
+
+        if (Object.keys(errors).length > 0) {
             return;
         }
 
@@ -93,7 +98,7 @@ function ComparisonForm() {
             });
             navigate('/comparisons');
         } catch (error) {
-            setErrorMessage(error.message);
+            setFormError(error.message);
             setSaving(false);
         }
     }
@@ -117,7 +122,7 @@ function ComparisonForm() {
                         </span>
                     </div>
 
-                    {errorMessage !== '' && <p className="error">{errorMessage}</p>}
+                    {formError !== '' && <p className="error">{formError}</p>}
 
                     {loading && <p className="empty">Loading your offers...</p>}
 
@@ -139,9 +144,17 @@ function ComparisonForm() {
                                         setComparisonName(event.target.value);
                                     }}
                                 />
+                                {fieldErrors.comparisonName && (
+                                    <span className="field-error">
+                                        {fieldErrors.comparisonName}
+                                    </span>
+                                )}
                             </label>
 
                             <span className="field-label">Select offers to compare</span>
+                            {fieldErrors.offerIds && (
+                                <span className="field-error">{fieldErrors.offerIds}</span>
+                            )}
                             <ul className="pick-list">
                                 {offers.map(function (offer) {
                                     return (

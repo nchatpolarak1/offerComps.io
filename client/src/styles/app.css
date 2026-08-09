@@ -131,6 +131,14 @@ h2 {
     font-size: 14px;
 }
 
+/* sits under the input it belongs to */
+.field-error {
+    display: block;
+    margin-top: 5px;
+    color: var(--error-color);
+    font-size: 13px;
+}
+
 /* pages shown after logging in */
 
 .app-page {

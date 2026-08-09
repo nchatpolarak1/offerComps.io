@@ -15,7 +15,8 @@ function SignupForm() {
         password: '',
         confirmPassword: ''
     });
-    const [errorMessage, setErrorMessage] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [formError, setFormError] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
     if (auth.isAuthenticated()) {
@@ -31,40 +32,38 @@ function SignupForm() {
     // the server checks all of this again, this is just faster feedback
     function validate() {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const errors = {};
 
         if (fields.firstName.trim() === '') {
-            setErrorMessage('First name is required.');
-            return false;
+            errors.firstName = 'First name is required.';
         }
         if (fields.lastName.trim() === '') {
-            setErrorMessage('Last name is required.');
-            return false;
+            errors.lastName = 'Last name is required.';
         }
         if (fields.email.trim() === '') {
-            setErrorMessage('Email is required.');
-            return false;
-        }
-        if (!emailPattern.test(fields.email.trim())) {
-            setErrorMessage('Please enter a valid email address.');
-            return false;
+            errors.email = 'Email is required.';
+        } else if (!emailPattern.test(fields.email.trim())) {
+            errors.email = 'Please enter a valid email address.';
         }
         if (fields.password.length < MIN_PASSWORD_LENGTH) {
-            setErrorMessage('Password must be at least ' + MIN_PASSWORD_LENGTH + ' characters.');
-            return false;
+            errors.password =
+                'Password must be at least ' + MIN_PASSWORD_LENGTH + ' characters.';
         }
         if (fields.password !== fields.confirmPassword) {
-            setErrorMessage('The two passwords do not match.');
-            return false;
+            errors.confirmPassword = 'The two passwords do not match.';
         }
 
-        return true;
+        return errors;
     }
 
     async function onSubmit(event) {
         event.preventDefault();
-        setErrorMessage('');
+        setFormError('');
 
-        if (!validate()) {
+        const errors = validate();
+        setFieldErrors(errors);
+
+        if (Object.keys(errors).length > 0) {
             return;
         }
 
@@ -77,7 +76,7 @@ function SignupForm() {
                 password: fields.password
             });
         } catch (error) {
-            setErrorMessage(error.message);
+            setFormError(error.message);
             setSubmitting(false);
         }
     }
@@ -98,6 +97,9 @@ function SignupForm() {
                                 updateField('firstName', event.target.value);
                             }}
                         />
+                        {fieldErrors.firstName && (
+                            <span className="field-error">{fieldErrors.firstName}</span>
+                        )}
                     </label>
 
                     <label className="field">
@@ -109,6 +111,9 @@ function SignupForm() {
                                 updateField('lastName', event.target.value);
                             }}
                         />
+                        {fieldErrors.lastName && (
+                            <span className="field-error">{fieldErrors.lastName}</span>
+                        )}
                     </label>
 
                     <label className="field">
@@ -120,6 +125,9 @@ function SignupForm() {
                                 updateField('email', event.target.value);
                             }}
                         />
+                        {fieldErrors.email && (
+                            <span className="field-error">{fieldErrors.email}</span>
+                        )}
                     </label>
 
                     <label className="field">
@@ -131,6 +139,9 @@ function SignupForm() {
                                 updateField('password', event.target.value);
                             }}
                         />
+                        {fieldErrors.password && (
+                            <span className="field-error">{fieldErrors.password}</span>
+                        )}
                     </label>
 
                     <label className="field">
@@ -142,9 +153,12 @@ function SignupForm() {
                                 updateField('confirmPassword', event.target.value);
                             }}
                         />
+                        {fieldErrors.confirmPassword && (
+                            <span className="field-error">{fieldErrors.confirmPassword}</span>
+                        )}
                     </label>
 
-                    {errorMessage !== '' && <p className="error">{errorMessage}</p>}
+                    {formError !== '' && <p className="error">{formError}</p>}
 
                     <button type="submit" className="button primary" disabled={submitting}>
                         {submitting ? 'Creating account...' : 'Sign Up'}

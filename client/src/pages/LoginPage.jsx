@@ -8,19 +8,35 @@ function LoginPage() {
     const auth = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [formError, setFormError] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
     if (auth.isAuthenticated()) {
         return <Navigate to="/offers" replace />;
     }
 
+    function validate() {
+        const errors = {};
+
+        if (email.trim() === '') {
+            errors.email = 'Email is required.';
+        }
+        if (password === '') {
+            errors.password = 'Password is required.';
+        }
+
+        return errors;
+    }
+
     async function onSubmit(event) {
         event.preventDefault();
-        setErrorMessage('');
+        setFormError('');
 
-        if (email.trim() === '' || password === '') {
-            setErrorMessage('Please enter your email and password.');
+        const errors = validate();
+        setFieldErrors(errors);
+
+        if (Object.keys(errors).length > 0) {
             return;
         }
 
@@ -28,7 +44,9 @@ function LoginPage() {
         try {
             await auth.login(email.trim(), password);
         } catch (error) {
-            setErrorMessage(error.message);
+            // the server will not say which of the two was wrong, so this one
+            // stays at the bottom of the form rather than under a field
+            setFormError(error.message);
             setSubmitting(false);
         }
     }
@@ -53,6 +71,9 @@ function LoginPage() {
                                 setEmail(event.target.value);
                             }}
                         />
+                        {fieldErrors.email && (
+                            <span className="field-error">{fieldErrors.email}</span>
+                        )}
                     </label>
 
                     <label className="field">
@@ -64,9 +85,12 @@ function LoginPage() {
                                 setPassword(event.target.value);
                             }}
                         />
+                        {fieldErrors.password && (
+                            <span className="field-error">{fieldErrors.password}</span>
+                        )}
                     </label>
 
-                    {errorMessage !== '' && <p className="error">{errorMessage}</p>}
+                    {formError !== '' && <p className="error">{formError}</p>}
 
                     <button type="submit" className="button primary" disabled={submitting}>
                         {submitting ? 'Signing in...' : 'Log In'}

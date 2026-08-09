@@ -103,7 +103,8 @@ function OfferForm() {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(true);
     const [cities, setCities] = useState([]);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [formError, setFormError] = useState('');
     const [saving, setSaving] = useState(false);
     const [fields, setFields] = useState({
         companyName: '',
@@ -141,7 +142,7 @@ function OfferForm() {
                         setCustomPerks(rows.customPerks);
                     }
                 } catch (error) {
-                    setErrorMessage(error.message);
+                    setFormError(error.message);
                 }
 
                 setLoading(false);
@@ -190,63 +191,55 @@ function OfferForm() {
 
     // the server checks all of this again, this is just faster feedback
     function validateStep1() {
+        const errors = {};
+
         if (fields.companyName.trim() === '') {
-            setErrorMessage('Company name is required.');
-            return false;
+            errors.companyName = 'Company name is required.';
         }
         if (fields.jobTitle.trim() === '') {
-            setErrorMessage('Job title is required.');
-            return false;
+            errors.jobTitle = 'Job title is required.';
         }
         if (fields.cityId === '') {
-            setErrorMessage('Please choose a city.');
-            return false;
+            errors.cityId = 'Please choose a city.';
         }
 
         const baseSalary = Number(fields.baseSalary);
         if (fields.baseSalary === '' || isNaN(baseSalary) || baseSalary <= 0) {
-            setErrorMessage('Base salary must be greater than zero.');
-            return false;
+            errors.baseSalary = 'Base salary must be greater than zero.';
         }
 
         if (fields.signingBonus !== '') {
             const signingBonus = Number(fields.signingBonus);
             if (isNaN(signingBonus) || signingBonus < 0) {
-                setErrorMessage('Signing bonus must be zero or more.');
-                return false;
+                errors.signingBonus = 'Signing bonus must be zero or more.';
             }
         }
 
         if (fields.annualBonusPct !== '') {
             const annualBonusPct = Number(fields.annualBonusPct);
             if (isNaN(annualBonusPct) || annualBonusPct < 0 || annualBonusPct > 100) {
-                setErrorMessage('Annual bonus must be between 0 and 100 percent.');
-                return false;
+                errors.annualBonusPct = 'Annual bonus must be between 0 and 100 percent.';
             }
         }
 
         if (fields.equityType === 'RSU') {
             const equityTotalValue = Number(fields.equityTotalValue);
             if (fields.equityTotalValue === '' || isNaN(equityTotalValue) || equityTotalValue < 0) {
-                setErrorMessage('Enter the total value of the equity grant.');
-                return false;
+                errors.equityTotalValue = 'Enter the total value of the equity grant.';
             }
 
             const equityVestYears = Number(fields.equityVestYears);
             if (fields.equityVestYears === '' || isNaN(equityVestYears)) {
-                setErrorMessage('Enter how many years the equity vests over.');
-                return false;
-            }
-            if (equityVestYears < 1 || equityVestYears > 10) {
-                setErrorMessage('Equity must vest over 1 to 10 years.');
-                return false;
+                errors.equityVestYears = 'Enter how many years the equity vests over.';
+            } else if (equityVestYears < 1 || equityVestYears > 10) {
+                errors.equityVestYears = 'Equity must vest over 1 to 10 years.';
             }
 
             if (fields.equityCliffMonths !== '') {
                 const cliff = Number(fields.equityCliffMonths);
                 if (isNaN(cliff) || cliff < 0 || cliff > 60) {
-                    setErrorMessage('The equity cliff must be between 0 and 60 months.');
-                    return false;
+                    errors.equityCliffMonths =
+                        'The equity cliff must be between 0 and 60 months.';
                 }
             }
         }
@@ -254,32 +247,31 @@ function OfferForm() {
         if (fields.expectedHoursWeek !== '') {
             const hours = Number(fields.expectedHoursWeek);
             if (isNaN(hours) || hours < 1 || hours > 100) {
-                setErrorMessage('Expected hours per week must be between 1 and 100.');
-                return false;
+                errors.expectedHoursWeek = 'Expected hours per week must be between 1 and 100.';
             }
         }
 
-        return true;
+        return errors;
     }
 
     function validateStep2() {
+        const errors = {};
+
         for (let i = 0; i < customPerks.length; i++) {
             const perk = customPerks[i];
 
             if (perk.name.trim() === '') {
-                setErrorMessage('Every custom perk needs a name.');
-                return false;
+                errors['perkName' + i] = 'Every custom perk needs a name.';
             }
             if (perk.annualValue !== '') {
                 const value = Number(perk.annualValue);
                 if (isNaN(value) || value < 0) {
-                    setErrorMessage('The value of "' + perk.name.trim() + '" must be zero or more.');
-                    return false;
+                    errors['perkValue' + i] = 'The value must be zero or more.';
                 }
             }
         }
 
-        return true;
+        return errors;
     }
 
     // rows the user left blank are not saved at all
@@ -367,24 +359,31 @@ function OfferForm() {
 
     function onNext(event) {
         event.preventDefault();
-        setErrorMessage('');
+        setFormError('');
 
-        if (!validateStep1()) {
+        const errors = validateStep1();
+        setFieldErrors(errors);
+
+        if (Object.keys(errors).length > 0) {
             return;
         }
         setStep(2);
     }
 
     function onBack() {
-        setErrorMessage('');
+        setFormError('');
+        setFieldErrors({});
         setStep(1);
     }
 
     async function save(event) {
         event.preventDefault();
-        setErrorMessage('');
+        setFormError('');
 
-        if (!validateStep2()) {
+        const errors = validateStep2();
+        setFieldErrors(errors);
+
+        if (Object.keys(errors).length > 0) {
             return;
         }
 
@@ -397,7 +396,7 @@ function OfferForm() {
             }
             navigate('/offers');
         } catch (error) {
-            setErrorMessage(error.message);
+            setFormError(error.message);
             setSaving(false);
         }
     }
@@ -426,7 +425,7 @@ function OfferForm() {
                         <span className="step-hint">Step {step} of 2</span>
                     </div>
 
-                    {errorMessage !== '' && <p className="error">{errorMessage}</p>}
+                    {formError !== '' && <p className="error">{formError}</p>}
 
                     {loading && <p className="empty">Loading...</p>}
 
@@ -441,6 +440,9 @@ function OfferForm() {
                                         updateField('companyName', event.target.value);
                                     }}
                                 />
+                                {fieldErrors.companyName && (
+                                    <span className="field-error">{fieldErrors.companyName}</span>
+                                )}
                             </label>
 
                             <div className="field-row">
@@ -453,6 +455,9 @@ function OfferForm() {
                                             updateField('jobTitle', event.target.value);
                                         }}
                                     />
+                                    {fieldErrors.jobTitle && (
+                                        <span className="field-error">{fieldErrors.jobTitle}</span>
+                                    )}
                                 </label>
 
                                 <label className="field">
@@ -487,6 +492,9 @@ function OfferForm() {
                                         );
                                     })}
                                 </select>
+                                {fieldErrors.cityId && (
+                                    <span className="field-error">{fieldErrors.cityId}</span>
+                                )}
                             </label>
 
                             <div className="field-row">
@@ -499,6 +507,9 @@ function OfferForm() {
                                             updateField('baseSalary', event.target.value);
                                         }}
                                     />
+                                    {fieldErrors.baseSalary && (
+                                        <span className="field-error">{fieldErrors.baseSalary}</span>
+                                    )}
                                 </label>
 
                                 <label className="field">
@@ -510,6 +521,9 @@ function OfferForm() {
                                             updateField('signingBonus', event.target.value);
                                         }}
                                     />
+                                    {fieldErrors.signingBonus && (
+                                        <span className="field-error">{fieldErrors.signingBonus}</span>
+                                    )}
                                 </label>
                             </div>
 
@@ -523,6 +537,9 @@ function OfferForm() {
                                             updateField('annualBonusPct', event.target.value);
                                         }}
                                     />
+                                    {fieldErrors.annualBonusPct && (
+                                        <span className="field-error">{fieldErrors.annualBonusPct}</span>
+                                    )}
                                 </label>
 
                                 <label className="field">
@@ -550,6 +567,9 @@ function OfferForm() {
                                                 updateField('equityTotalValue', event.target.value);
                                             }}
                                         />
+                                        {fieldErrors.equityTotalValue && (
+                                            <span className="field-error">{fieldErrors.equityTotalValue}</span>
+                                        )}
                                     </label>
 
                                     <label className="field">
@@ -561,6 +581,9 @@ function OfferForm() {
                                                 updateField('equityVestYears', event.target.value);
                                             }}
                                         />
+                                        {fieldErrors.equityVestYears && (
+                                            <span className="field-error">{fieldErrors.equityVestYears}</span>
+                                        )}
                                     </label>
 
                                     <label className="field">
@@ -572,6 +595,9 @@ function OfferForm() {
                                                 updateField('equityCliffMonths', event.target.value);
                                             }}
                                         />
+                                        {fieldErrors.equityCliffMonths && (
+                                            <span className="field-error">{fieldErrors.equityCliffMonths}</span>
+                                        )}
                                     </label>
                                 </div>
                             )}
@@ -586,6 +612,9 @@ function OfferForm() {
                                             updateField('expectedHoursWeek', event.target.value);
                                         }}
                                     />
+                                    {fieldErrors.expectedHoursWeek && (
+                                        <span className="field-error">{fieldErrors.expectedHoursWeek}</span>
+                                    )}
                                 </label>
 
                                 <label className="field">
@@ -691,6 +720,11 @@ function OfferForm() {
                                                         updateCustomPerk(index, 'name', event.target.value);
                                                     }}
                                                 />
+                                                {fieldErrors['perkName' + index] && (
+                                                    <span className="field-error">
+                                                        {fieldErrors['perkName' + index]}
+                                                    </span>
+                                                )}
                                             </label>
 
                                             <label className="field">
@@ -722,6 +756,11 @@ function OfferForm() {
                                                         updateCustomPerk(index, 'annualValue', event.target.value);
                                                     }}
                                                 />
+                                                {fieldErrors['perkValue' + index] && (
+                                                    <span className="field-error">
+                                                        {fieldErrors['perkValue' + index]}
+                                                    </span>
+                                                )}
                                             </label>
 
                                             <label className="field">

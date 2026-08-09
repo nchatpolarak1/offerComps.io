@@ -39,6 +39,10 @@ function LoginPage() {
                 <h1 className="card-title">Job Offer Comparison Tool</h1>
                 <p className="card-subtitle">Sign in to compare your offers.</p>
 
+                {auth.sessionExpired && (
+                    <p className="error">Your session timed out. Please log in again.</p>
+                )}
+
                 <form onSubmit={onSubmit}>
                     <label className="field">
                         <span className="field-label">Email</span>

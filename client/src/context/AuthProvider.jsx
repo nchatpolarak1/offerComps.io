@@ -10,6 +10,7 @@ function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [sessionExpired, setSessionExpired] = useState(false);
 
     // a saved token means the user was logged in before the page reloaded
     useEffect(function () {
@@ -43,6 +44,7 @@ function AuthProvider({ children }) {
         apiClient.setToken(data.token);
         setToken(data.token);
         setUser(data.user);
+        setSessionExpired(false);
     }
 
     function clearSession() {
@@ -51,6 +53,15 @@ function AuthProvider({ children }) {
         setToken(null);
         setUser(null);
     }
+
+    // the session can run out while the page is open, so any request that comes
+    // back 401 logs out and ProtectedRoute sends the user to the login page
+    useEffect(function () {
+        apiClient.setUnauthorizedHandler(function () {
+            clearSession();
+            setSessionExpired(true);
+        });
+    }, []);
 
     async function login(email, password) {
         const data = await apiClient.post('/auth/login', {
@@ -83,6 +94,7 @@ function AuthProvider({ children }) {
         user: user,
         token: token,
         loading: loading,
+        sessionExpired: sessionExpired,
         login: login,
         register: register,
         logout: logout,

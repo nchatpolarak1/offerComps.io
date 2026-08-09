@@ -346,6 +346,23 @@ h2 {
     font-size: 15px;
 }
 
+/* the percent input and its "% of base" tag sit together on one row */
+.perk-percent {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.perk-percent input {
+    width: 150px;
+}
+
+.perk-suffix {
+    font-size: 14px;
+    color: var(--muted-text);
+}
+
 .perk-row input,
 .perk-row select {
     width: 220px;

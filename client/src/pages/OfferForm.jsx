@@ -7,10 +7,10 @@ import apiClient from '../services/apiClient';
 
 // the perk rows every offer starts with, as sketched in the prototype
 const PRESET_PERKS = [
-    { name: '401k match', category: 'retirement', inputType: 'money' },
+    { name: '401k match', category: 'retirement', inputType: 'percentOfBase', placeholder: 'Percent of base' },
     { name: 'PTO type', category: 'PTO', inputType: 'choice', choices: ['unlimited', 'accrued', 'fixed days'] },
-    { name: 'Benefits', category: 'lifestyle', inputType: 'money' },
-    { name: 'Relocation', category: 'other', inputType: 'money' },
+    { name: 'Benefits', category: 'lifestyle', inputType: 'text', placeholder: 'PPO medical, dental, vision' },
+    { name: 'Relocation', category: 'other', inputType: 'money', placeholder: 'Amount in dollars' },
     { name: 'VISA sponsorship', category: 'other', inputType: 'choice', choices: ['yes', 'no'] }
 ];
 
@@ -44,7 +44,7 @@ function findPresetIndex(perkName) {
 
 // a saved perk goes back into the row it was entered in, and anything that is
 // not one of the preset rows goes back into the custom list
-function perksToRows(perks) {
+function perksToRows(perks, baseSalary) {
     const presetValues = blankPresetValues();
     const customPerks = [];
 
@@ -61,6 +61,15 @@ function perksToRows(perks) {
             });
         } else if (PRESET_PERKS[index].inputType === 'money') {
             presetValues[index] = toFieldValue(perk.annualValue);
+        } else if (PRESET_PERKS[index].inputType === 'percentOfBase') {
+            if (perk.detail) {
+                presetValues[index] = toFieldValue(perk.detail);
+            } else if (perk.annualValue && baseSalary > 0) {
+                // saved before this row asked for a percent, so work the
+                // percent back out of the dollar amount
+                const percent = (perk.annualValue / baseSalary) * 100;
+                presetValues[index] = String(Math.round(percent * 100) / 100);
+            }
         } else {
             presetValues[index] = toFieldValue(perk.detail);
         }
@@ -135,7 +144,7 @@ function OfferForm() {
 
                     if (offerId) {
                         const saved = await apiClient.get('/offers/' + offerId);
-                        const rows = perksToRows(saved.offer.perks);
+                        const rows = perksToRows(saved.offer.perks, saved.offer.baseSalary);
 
                         setFields(offerToFields(saved.offer));
                         setPresetValues(rows.presetValues);
@@ -257,6 +266,18 @@ function OfferForm() {
     function validateStep2() {
         const errors = {};
 
+        for (let i = 0; i < PRESET_PERKS.length; i++) {
+            const preset = PRESET_PERKS[i];
+            const value = presetValues[i].trim();
+
+            if (preset.inputType === 'percentOfBase' && value !== '') {
+                const percent = Number(value);
+                if (isNaN(percent) || percent < 0 || percent > 100) {
+                    errors['preset' + i] = 'Enter a percentage between 0 and 100.';
+                }
+            }
+        }
+
         for (let i = 0; i < customPerks.length; i++) {
             const perk = customPerks[i];
 
@@ -289,6 +310,18 @@ function OfferForm() {
                         category: preset.category,
                         annualValue: value,
                         detail: ''
+                    });
+                } else if (preset.inputType === 'percentOfBase') {
+                    // the percent is what gets typed, but scoring adds up dollars,
+                    // so both are saved
+                    const base = Number(fields.baseSalary);
+                    const dollars = Math.round((base * Number(value)) / 100);
+
+                    perks.push({
+                        name: preset.name,
+                        category: preset.category,
+                        annualValue: String(dollars),
+                        detail: value
                     });
                 } else {
                     perks.push({
@@ -677,16 +710,8 @@ function OfferForm() {
                                 return (
                                     <label className="perk-row" key={preset.name}>
                                         <span className="perk-name">{preset.name}</span>
-                                        {preset.inputType === 'money' ? (
-                                            <input
-                                                type="number"
-                                                placeholder="Value per year"
-                                                value={presetValues[index]}
-                                                onChange={function (event) {
-                                                    updatePresetValue(index, event.target.value);
-                                                }}
-                                            />
-                                        ) : (
+
+                                        {preset.inputType === 'choice' && (
                                             <select
                                                 value={presetValues[index]}
                                                 onChange={function (event) {
@@ -702,6 +727,47 @@ function OfferForm() {
                                                     );
                                                 })}
                                             </select>
+                                        )}
+
+                                        {preset.inputType === 'text' && (
+                                            <input
+                                                type="text"
+                                                placeholder={preset.placeholder}
+                                                value={presetValues[index]}
+                                                onChange={function (event) {
+                                                    updatePresetValue(index, event.target.value);
+                                                }}
+                                            />
+                                        )}
+
+                                        {preset.inputType === 'money' && (
+                                            <input
+                                                type="number"
+                                                placeholder={preset.placeholder}
+                                                value={presetValues[index]}
+                                                onChange={function (event) {
+                                                    updatePresetValue(index, event.target.value);
+                                                }}
+                                            />
+                                        )}
+
+                                        {preset.inputType === 'percentOfBase' && (
+                                            <span className="perk-percent">
+                                                <input
+                                                    type="number"
+                                                    placeholder={preset.placeholder}
+                                                    value={presetValues[index]}
+                                                    onChange={function (event) {
+                                                        updatePresetValue(index, event.target.value);
+                                                    }}
+                                                />
+                                                <span className="perk-suffix">% of base</span>
+                                                {fieldErrors['preset' + index] && (
+                                                    <span className="field-error">
+                                                        {fieldErrors['preset' + index]}
+                                                    </span>
+                                                )}
+                                            </span>
                                         )}
                                     </label>
                                 );

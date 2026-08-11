@@ -78,6 +78,13 @@ function ComparisonsPage() {
         return comparison.offerIds.length + ' offers';
     }
 
+    function weightsText(comparison) {
+        return 'Pay ' + asPercent(comparison.weights.pay) +
+            ' · Commute ' + asPercent(comparison.weights.commute) +
+            ' · Hours ' + asPercent(comparison.weights.hours) +
+            ' · Flexibility ' + asPercent(comparison.weights.flexibility);
+    }
+
     return (
         <div className="app-page">
             <header className="app-header">
@@ -124,15 +131,10 @@ function ComparisonsPage() {
                                                 {comparison.comparisonName}
                                             </Link>
                                             <span className="offer-meta">
-                                                {offerCountText(comparison)} &middot;{' '}
-                                                {topScoreText(comparison)}
+                                                {offerCountText(comparison) + ' · ' + topScoreText(comparison)}
                                             </span>
                                             <span className="offer-meta">
-                                                Pay {asPercent(comparison.weights.pay)} &middot;
-                                                Commute {asPercent(comparison.weights.commute)}{' '}
-                                                &middot; Hours {asPercent(comparison.weights.hours)}{' '}
-                                                &middot; Flexibility{' '}
-                                                {asPercent(comparison.weights.flexibility)}
+                                                {weightsText(comparison)}
                                             </span>
                                         </div>
 

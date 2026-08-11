@@ -1,5 +1,3 @@
-// wrapper around fetch for calling the API
-
 const BASE_URL = '/api';
 
 let authToken = null;

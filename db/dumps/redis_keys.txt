@@ -1,4 +1,4 @@
-redis keys held on 2026-08-08 15:35
+redis keys held on 2026-08-10 20:10
 
 the five patterns this app uses:
   session:<token>              logged in user, 30 minute sliding expiry
@@ -6,43 +6,4 @@ the five patterns this app uses:
   city:<id>                    cached city row
   taxBrackets:<state>:<year>   cached tax brackets
   comparison:<id>:scores       ranked scores, 1 hour
-
-city:1
-  type hash, expires in 75214 seconds
-  cityName = San Francisco
-  stateCode = CA
-  colIndex = 169.6
-  meanCommuteMinutes = 32.5
-  medianRent1br = 2950
-
-city:9
-  type hash, expires in 2018 seconds
-  cityName = Austin
-  stateCode = TX
-  colIndex = 101.3
-  meanCommuteMinutes = 25.7
-  medianRent1br = 1450
-
-comparison:7:scores
-  type zset, expires in 3551 seconds
-  7 = 89
-  9 = 93
-
-loginAttempts:badperson@example.com
-  type string, expires in 881 seconds
-  1
-
-session:9aa1d61725c6db8ad9b05aa5fe3597381f7e6fff2687f430a86a6790025fb200
-  type hash, expires in 1751 seconds
-  Uid = 2
-  email = demo@example.com
-  firstName = Nathan
-
-taxBrackets:CA:2025
-  type string, expires in 75214 seconds
-  [{"lower":0,"upper":10756,"rate":0.01},{"lower":10756,"upper":25499,"rate":0.02},{"lower":25499,"upper":40245,"rate":0.04},{"lower":40245,"upper":55866,"rate":0.06},{"lower":55866,"upper":70606,"rate":0.08},{"lower":70606,"upper":360659,"rate":0.093},{"lower":360659,"upper":432787,"rate":0.103},{"lower":432787,"upper":721314,"rate":0.113},{"lower":721314,"upper":null,"rate":0.123}]
-
-taxBrackets:US:2025
-  type string, expires in 75214 seconds
-  [{"lower":0,"upper":11925,"rate":0.1},{"lower":11925,"upper":48475,"rate":0.12},{"lower":48475,"upper":103350,"rate":0.22},{"lower":103350,"upper":197300,"rate":0.24},{"lower":197300,"upper":250525,"rate":0.32},{"lower":250525,"upper":626350,"rate":0.35},{"lower":626350,"upper":null,"rate":0.37}]
 

@@ -1,5 +1,4 @@
-// Single error handler for the whole API. Sends a JSON message and keeps
-// stack traces on the server.
+// single error handler for the whole api, keeps stack traces off the response
 
 function notFound(req, res) {
     res.status(404).json({ error: 'Not found' });
@@ -25,7 +24,7 @@ function errorHandler(error, req, res, next) {
     res.status(status).json({ error: message });
 }
 
-// Helper for throwing errors that carry an HTTP status.
+// throws an error that carries an http status code
 function httpError(status, message) {
     const error = new Error(message);
     error.status = status;

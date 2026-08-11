@@ -198,7 +198,7 @@ function OfferForm() {
         setCustomPerks(remaining);
     }
 
-    // the server checks all of this again, this is just faster feedback
+    // mirrors what the server checks, just quicker to show it here first
     function validateStep1() {
         const errors = {};
 

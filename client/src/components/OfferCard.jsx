@@ -1,5 +1,3 @@
-// one row in the "My Offers" list
-
 import { Link } from 'react-router-dom';
 
 function formatMoney(amount) {
@@ -16,6 +14,9 @@ function OfferCard({ offer, onDelete, busy }) {
         perkSummary = offer.perks.length + ' perks';
     }
 
+    const metaText = location + ' · ' + offer.workArrangement + ' · ' +
+        offer.expectedHoursWeek + ' hrs/week · ' + perkSummary;
+
     function onDeleteClick() {
         const message =
             'Delete the ' + offer.jobTitle + ' offer from ' + offer.companyName + '?';
@@ -29,10 +30,7 @@ function OfferCard({ offer, onDelete, busy }) {
             <div className="offer-main">
                 <span className="offer-company">{offer.companyName}</span>
                 <span className="offer-title">{offer.jobTitle}</span>
-                <span className="offer-meta">
-                    {location} &middot; {offer.workArrangement} &middot;{' '}
-                    {offer.expectedHoursWeek} hrs/week &middot; {perkSummary}
-                </span>
+                <span className="offer-meta">{metaText}</span>
             </div>
 
             <div className="offer-side">

@@ -51,7 +51,7 @@ CREATE TABLE `app_user` (
 LOCK TABLES `app_user` WRITE;
 /*!40000 ALTER TABLE `app_user` DISABLE KEYS */;
 INSERT INTO `app_user` VALUES
-(2,'demo@example.com','$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','Nathan','Chatpolarak','2026-08-04 23:51:15','2026-08-08 19:34:09');
+(2,'demo@example.com','$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy','Nathan','Chatpolarak','2026-08-04 23:51:15','2026-08-09 22:48:58');
 /*!40000 ALTER TABLE `app_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -116,7 +116,7 @@ CREATE TABLE `company` (
   UNIQUE KEY `uq_company_name` (`company_name`),
   KEY `fk_company_hq_city` (`hq_city_id`),
   CONSTRAINT `fk_company_hq_city` FOREIGN KEY (`hq_city_id`) REFERENCES `city` (`city_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -129,7 +129,9 @@ INSERT INTO `company` VALUES
 (1,'Google',NULL,NULL,NULL),
 (2,'Meta',NULL,NULL,NULL),
 (3,'Citadel',NULL,NULL,NULL),
-(6,'Apple',NULL,NULL,NULL);
+(6,'Apple',NULL,NULL,NULL),
+(8,'asdfadfs',NULL,NULL,NULL),
+(9,'microsoft',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `company` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -153,7 +155,7 @@ CREATE TABLE `comparison` (
   KEY `idx_comparison_user` (`user_id`),
   CONSTRAINT `fk_comparison_user` FOREIGN KEY (`user_id`) REFERENCES `app_user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `chk_weights_sum` CHECK (`w_pay` + `w_commute` + `w_hours` + `w_flexibility` = 1.00)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -163,8 +165,10 @@ CREATE TABLE `comparison` (
 LOCK TABLES `comparison` WRITE;
 /*!40000 ALTER TABLE `comparison` DISABLE KEYS */;
 INSERT INTO `comparison` VALUES
-(4,2,'battle of the faangs',0.55,0.15,0.20,0.10,'2026-08-07 20:09:06'),
-(7,2,'goog v meta',0.50,0.20,0.20,0.10,'2026-08-08 01:24:56');
+(4,2,'battle of the faangs',0.00,0.37,0.42,0.21,'2026-08-07 20:09:06'),
+(7,2,'goog v meta',0.34,0.15,0.45,0.06,'2026-08-08 01:24:56'),
+(8,2,'asfasdf',0.50,0.20,0.20,0.10,'2026-08-09 20:33:18'),
+(9,2,'all of it',0.50,0.20,0.20,0.10,'2026-08-09 22:53:30');
 /*!40000 ALTER TABLE `comparison` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -196,7 +200,15 @@ INSERT INTO `comparison_offer` VALUES
 (4,7,2),
 (4,8,1),
 (7,7,2),
-(7,9,1);
+(7,9,1),
+(8,6,4),
+(8,7,3),
+(8,8,2),
+(8,9,1),
+(9,6,4),
+(9,7,3),
+(9,8,2),
+(9,9,1);
 /*!40000 ALTER TABLE `comparison_offer` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -236,7 +248,7 @@ CREATE TABLE `offer` (
   CONSTRAINT `fk_offer_user` FOREIGN KEY (`user_id`) REFERENCES `app_user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `chk_offer_salary` CHECK (`base_salary` > 0),
   CONSTRAINT `chk_offer_hours` CHECK (`expected_hours_week` between 1 and 100)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -249,7 +261,7 @@ INSERT INTO `offer` VALUES
 (6,2,3,2,'Software Engineer',NULL,250000.00,120000.00,0.00,'none',NULL,NULL,NULL,50,'onsite','pending',NULL,'2026-08-07 18:42:16','2026-08-07 18:42:16'),
 (7,2,2,1,'Software Engineer',NULL,144000.00,6000.00,0.00,'RSU',40000.00,4,12,40,'onsite','pending',NULL,'2026-08-07 18:44:14','2026-08-07 18:44:14'),
 (8,2,6,9,'Software Engineer',NULL,128000.00,10000.00,0.00,'RSU',22000.00,4,12,40,'onsite','pending',NULL,'2026-08-07 20:08:42','2026-08-07 20:08:42'),
-(9,2,1,1,'Software Engineer',NULL,160000.00,7000.00,0.00,'RSU',34000.00,4,12,40,'onsite','pending',NULL,'2026-08-07 21:53:59','2026-08-07 21:53:59');
+(9,2,1,1,'Software Engineer',NULL,160000.00,7000.00,0.00,'RSU',34000.00,4,12,60,'onsite','pending',NULL,'2026-08-07 21:53:59','2026-08-09 16:34:50');
 /*!40000 ALTER TABLE `offer` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -393,4 +405,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-08-08 15:34:59
+-- Dump completed on 2026-08-10 20:10:48

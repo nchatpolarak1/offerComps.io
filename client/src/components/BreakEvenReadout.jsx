@@ -22,8 +22,7 @@ function BreakEvenReadout({ breakEven }) {
     return (
         <div>
             <p className="insight-lead">
-                {breakEven.bestCompanyName} is worth the most once income tax and the cost of
-                living are taken out.
+                Best offer after tax and cost of living: {breakEven.bestCompanyName}.
             </p>
 
             <div className="table-scroll">
@@ -48,10 +47,7 @@ function BreakEvenReadout({ breakEven }) {
                                 <tr key={offer.offerId}>
                                     <td>
                                         {offer.companyName}
-                                        <span className="offer-meta">
-                                            {' '}
-                                            {offer.cityName}, {offer.stateCode}
-                                        </span>
+                                        <span className="offer-meta"> {offer.cityName}, {offer.stateCode}</span>
                                     </td>
                                     <td className="number">{formatMoney(offer.takeHome)}</td>
                                     <td className="number">{offer.colIndex}</td>

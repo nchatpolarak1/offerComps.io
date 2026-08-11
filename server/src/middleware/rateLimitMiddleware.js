@@ -1,6 +1,4 @@
-// Failed login lockout, counted in Redis as loginAttempts:<email>.
-// EXPIRE is set only on the first failure, so the 15 minute window starts
-// at attempt one rather than sliding forward with each new failure.
+// failed login lockout, counted in Redis as loginAttempts:<email>
 
 const redisClient = require('../db/redisClient');
 const config = require('../config/env');
@@ -10,8 +8,7 @@ function keyFor(email) {
     return 'loginAttempts:' + email;
 }
 
-// Runs before the login handler and blocks the attempt once the account
-// has already hit the limit.
+// runs before the login handler, blocks once the account already hit the limit
 async function checkLoginAttempts(req, res, next) {
     try {
         const email = req.body.email;
@@ -40,6 +37,8 @@ async function recordFailure(email) {
     const key = keyFor(email);
     const attempts = await redisClient.client.incr(key);
 
+    // only set the expiry on the first failure, not every one, so the window
+    // starts at attempt one instead of sliding forward each time
     if (attempts === 1) {
         await redisClient.client.expire(key, config.loginAttemptWindowSeconds);
     }

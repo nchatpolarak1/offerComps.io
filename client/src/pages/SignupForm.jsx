@@ -1,5 +1,3 @@
-// create account card
-
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -29,7 +27,6 @@ function SignupForm() {
         setFields(updated);
     }
 
-    // the server checks all of this again, this is just faster feedback
     function validate() {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const errors = {};

@@ -1,4 +1,4 @@
-// every page of the app and the address that shows it
+// route table for the app
 
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';

@@ -27,7 +27,7 @@ function ComparisonForm() {
                 const data = await apiClient.get('/offers');
                 setOffers(data.offers);
             } catch (error) {
-                setErrorMessage(error.message);
+                setFormError(error.message);
             }
 
             setLoading(false);
@@ -35,6 +35,11 @@ function ComparisonForm() {
 
         loadOffers();
     }, []);
+
+    function offerSummary(offer) {
+        return offer.jobTitle + ' · ' + offer.cityName + ', ' + offer.stateCode +
+            ' · ' + offer.workArrangement;
+    }
 
     function isSelected(offerId) {
         return selectedIds.indexOf(offerId) !== -1;
@@ -172,9 +177,7 @@ function ComparisonForm() {
                                                         {offer.companyName}
                                                     </span>
                                                     <span className="offer-meta">
-                                                        {offer.jobTitle} &middot; {offer.cityName},{' '}
-                                                        {offer.stateCode} &middot;{' '}
-                                                        {offer.workArrangement}
+                                                        {offerSummary(offer)}
                                                     </span>
                                                 </span>
                                                 <span className="offer-salary">

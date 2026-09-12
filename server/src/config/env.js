@@ -1,6 +1,7 @@
 // settings from server/.env
 
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
@@ -15,10 +16,14 @@ const SESSION_TTL_SECONDS = 1800;
 const LOGIN_ATTEMPT_LIMIT = 5;
 const LOGIN_ATTEMPT_WINDOW_SECONDS = 900;
 
-// a hosted database needs TLS and its certificate, a local one needs neither
+// a hosted database needs TLS and its certificate, a local one needs neither.
+// the certificate comes from a file when developing and from the variable itself
+// on a host like vercel, where there is nowhere to put the file
 let mysqlSsl;
 if (process.env.MYSQL_CA_CERT) {
     mysqlSsl = { ca: process.env.MYSQL_CA_CERT };
+} else if (process.env.MYSQL_CA_CERT_PATH) {
+    mysqlSsl = { ca: fs.readFileSync(process.env.MYSQL_CA_CERT_PATH, 'utf8') };
 }
 
 // a hosted url carries the password in it, so hide that before it reaches a log

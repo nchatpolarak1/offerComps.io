@@ -21,6 +21,19 @@ if (process.env.MYSQL_CA_CERT) {
     mysqlSsl = { ca: process.env.MYSQL_CA_CERT };
 }
 
+// a hosted url carries the password in it, so hide that before it reaches a log
+function hidePassword(rawUrl) {
+    try {
+        const parsed = new URL(rawUrl);
+        if (parsed.password) {
+            parsed.password = '***';
+        }
+        return parsed.toString();
+    } catch (error) {
+        return 'the configured url';
+    }
+}
+
 const config = {
     port: Number(process.env.PORT) || 3000,
     clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
@@ -36,11 +49,13 @@ const config = {
     },
 
     redis: {
-        url: process.env.REDIS_URL || 'redis://127.0.0.1:6379'
+        url: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
+        safeUrl: hidePassword(process.env.REDIS_URL || 'redis://127.0.0.1:6379')
     },
 
     mongo: {
         url: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017',
+        safeUrl: hidePassword(process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'),
         database: process.env.MONGO_DATABASE || 'job_offers'
     },
 

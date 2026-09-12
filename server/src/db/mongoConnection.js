@@ -14,7 +14,7 @@ async function openConnection() {
         await database.command({ ping: 1 });
     } catch (error) {
         throw new Error(
-            'Could not connect to MongoDB at ' + config.mongo.url +
+            'Could not connect to MongoDB at ' + config.mongo.safeUrl +
             '. Check that mongod is running. Original error: ' + error.message
         );
     }

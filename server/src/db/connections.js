@@ -14,7 +14,7 @@ async function connectAll() {
 
     if (!announced) {
         console.log('Connected to MySQL database "' + config.mysql.database + '"');
-        console.log('Connected to Redis at ' + config.redis.url);
+        console.log('Connected to Redis at ' + config.redis.safeUrl);
         console.log('Connected to MongoDB database "' + config.mongo.database + '"');
         announced = true;
     }

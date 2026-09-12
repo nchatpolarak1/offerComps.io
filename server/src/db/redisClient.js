@@ -16,7 +16,7 @@ async function openConnection() {
         await client.connect();
     } catch (error) {
         throw new Error(
-            'Could not connect to Redis at ' + config.redis.url +
+            'Could not connect to Redis at ' + config.redis.safeUrl +
             '. Check that the Redis server is running. Original error: ' + error.message
         );
     }

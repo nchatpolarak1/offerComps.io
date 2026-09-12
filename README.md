@@ -1,6 +1,4 @@
-# Job Offer Comparison Tool
-
-Nathan Chatpolarak - Web Development final project
+# offerComps.io
 
 A web application for comparing competing job offers. A job seeker saves the
 offers they have received, sets weight sliders for what matters to them (pay,

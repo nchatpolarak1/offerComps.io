@@ -5,8 +5,9 @@ const config = require('../config/env');
 
 const client = new MongoClient(config.mongo.url);
 let database = null;
+let connectPromise = null;
 
-async function connect() {
+async function openConnection() {
     try {
         await client.connect();
         database = client.db(config.mongo.database);
@@ -16,6 +17,20 @@ async function connect() {
             'Could not connect to MongoDB at ' + config.mongo.url +
             '. Check that mongod is running. Original error: ' + error.message
         );
+    }
+}
+
+// only opens the connection once, however many times it is called
+async function connect() {
+    if (connectPromise === null) {
+        connectPromise = openConnection();
+    }
+
+    try {
+        await connectPromise;
+    } catch (error) {
+        connectPromise = null;
+        throw error;
     }
 }
 
@@ -31,6 +46,8 @@ function collection(name) {
 }
 
 async function close() {
+    connectPromise = null;
+    database = null;
     await client.close();
 }
 

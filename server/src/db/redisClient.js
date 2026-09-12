@@ -5,11 +5,13 @@ const config = require('../config/env');
 
 const client = redis.createClient({ url: config.redis.url });
 
+let connectPromise = null;
+
 client.on('error', function (error) {
     console.error('Redis error:', error.message);
 });
 
-async function connect() {
+async function openConnection() {
     try {
         await client.connect();
     } catch (error) {
@@ -20,7 +22,31 @@ async function connect() {
     }
 }
 
+// only opens the connection once, however many times it is called
+async function connect() {
+    if (client.isOpen) {
+        return;
+    }
+
+    // the socket closed after a successful connect, so try again from scratch
+    if (connectPromise !== null && !client.isOpen) {
+        connectPromise = null;
+    }
+
+    if (connectPromise === null) {
+        connectPromise = openConnection();
+    }
+
+    try {
+        await connectPromise;
+    } catch (error) {
+        connectPromise = null;
+        throw error;
+    }
+}
+
 async function close() {
+    connectPromise = null;
     await client.quit();
 }
 

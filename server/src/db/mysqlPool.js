@@ -14,6 +14,8 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
+let connectPromise = null;
+
 async function query(sql, params) {
     const result = await pool.query(sql, params);
     const rows = result[0];
@@ -26,8 +28,7 @@ async function getConnection() {
     return connection;
 }
 
-// startup check
-async function connect() {
+async function openConnection() {
     try {
         const connection = await pool.getConnection();
         connection.release();
@@ -40,7 +41,22 @@ async function connect() {
     }
 }
 
+// only opens the connection once, however many times it is called
+async function connect() {
+    if (connectPromise === null) {
+        connectPromise = openConnection();
+    }
+
+    try {
+        await connectPromise;
+    } catch (error) {
+        connectPromise = null;
+        throw error;
+    }
+}
+
 async function close() {
+    connectPromise = null;
     await pool.end();
 }
 

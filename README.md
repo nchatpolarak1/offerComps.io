@@ -108,7 +108,7 @@ db/
   mysql/schema.sql   table definitions
   mysql/seed.sql     states, cities, and tax brackets
   mongo/init.js      MongoDB collections and indexes
-  dumps/             database dumps for submission
+  dumps/             exported dumps of all three databases
 server/
   src/config/        environment configuration
   src/db/            MySQL, Redis, and MongoDB connections

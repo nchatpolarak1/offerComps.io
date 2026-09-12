@@ -15,6 +15,12 @@ const SESSION_TTL_SECONDS = 1800;
 const LOGIN_ATTEMPT_LIMIT = 5;
 const LOGIN_ATTEMPT_WINDOW_SECONDS = 900;
 
+// a hosted database needs TLS and its certificate, a local one needs neither
+let mysqlSsl;
+if (process.env.MYSQL_CA_CERT) {
+    mysqlSsl = { ca: process.env.MYSQL_CA_CERT };
+}
+
 const config = {
     port: Number(process.env.PORT) || 3000,
     clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
@@ -24,7 +30,9 @@ const config = {
         port: Number(process.env.MYSQL_PORT) || 3306,
         user: process.env.MYSQL_USER,
         password: process.env.MYSQL_PASSWORD,
-        database: process.env.MYSQL_DATABASE
+        database: process.env.MYSQL_DATABASE,
+        ssl: mysqlSsl,
+        connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT) || 10
     },
 
     redis: {

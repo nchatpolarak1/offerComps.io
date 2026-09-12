@@ -4,6 +4,12 @@ node_modules/
 .env
 .env.local
 
+# Database certificates, such as the CA file a hosted MySQL hands out
+*.pem
+
+# Vercel CLI working directory
+.vercel
+
 # Build output
 dist/
 build/

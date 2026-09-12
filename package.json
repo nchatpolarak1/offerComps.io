@@ -1,0 +1,17 @@
+{
+  "name": "offercomps",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Job offer comparison web application",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace client",
+    "start": "npm run start --workspace server",
+    "dev": "npm run dev --workspace server"
+  },
+  "author": "Nathan Chatpolarak",
+  "license": "ISC"
+}

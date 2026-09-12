@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Job Offer Comparison Tool - Recreate Environment Setup</title>
+<style>
+  @page {
+    size: letter portrait;
+    margin: 0.6in;
+  }
+  body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  h1 {
+    font-size: 16px;
+    margin: 0 0 2px 0;
+  }
+  p.byline {
+    margin: 0 0 14px 0;
+    font-size: 10.5px;
+    color: #444;
+  }
+  h2 {
+    font-size: 12.5px;
+    margin: 16px 0 5px 0;
+    border-bottom: 1px solid #999;
+    padding-bottom: 2px;
+    break-after: avoid;
+  }
+  p {
+    margin: 5px 0;
+    max-width: 7in;
+  }
+  ul {
+    margin: 5px 0;
+    padding-left: 18px;
+  }
+  li { margin: 2px 0; }
+  pre {
+    font-family: "Courier New", monospace;
+    font-size: 9.5px;
+    line-height: 1.35;
+    background: #f6f6f9;
+    border: 1px solid #bbb;
+    padding: 6px 9px;
+    margin: 6px 0;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    break-inside: avoid;
+  }
+  code {
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 6px 0;
+    break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #555;
+    padding: 3px 6px;
+    text-align: left;
+    vertical-align: top;
+    font-size: 10px;
+  }
+  th {
+    background: #ececf1;
+    font-weight: bold;
+  }
+  .fill {
+    background: #fff6d5;
+    padding: 0 2px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Job Offer Comparison Tool - Recreate Environment Steps</h1>
+<p class="byline">Nathan Chatpolarak</p>
+
+
+<h2>1. Dependencies</h2>
+
+<ul>
+  <li>Node.js: 26.5.1</li>
+  <li>MySQL/MariaDB: 8/11.7.2</li>
+  <li>Redis: 8.8.0</li>
+ <li>MongoDB: 8.3.7</li>
+
+</ul>  
+
+
+<h2>2. Code</h2>
+
+<pre>git clone https://code.vt.edu/nchatpol/chatpolarak_nathan_final_webapp.git
+cd chatpolarak_nathan_final_webapp</pre>
+
+<p>Run all commands from that directory.</p>
+
+<h2>3. Create the MySQL database and its user</h2>
+
+<p>Log in to MySQL as an administrator and run:</p>
+
+<pre>CREATE USER 'joboffers'@'localhost' IDENTIFIED BY 'hokies2026';
+CREATE DATABASE job_offers CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+GRANT ALL PRIVILEGES ON job_offers.* TO 'joboffers'@'localhost';
+FLUSH PRIVILEGES;</pre>
+
+<p>Step 5 already expects this password.</p>
+
+<h2>4. Load the data</h2>
+
+<p>Two options.</p>
+
+<p>Option A starts empty: tables plus the reference data (states, the 12 cities, federal
+and state tax brackets). No accounts, no offers.</p>
+
+<pre>mysql -h 127.0.0.1 -u joboffers -p job_offers &lt; db/mysql/schema.sql
+mysql -h 127.0.0.1 -u joboffers -p job_offers &lt; db/mysql/seed.sql
+mongosh job_offers db/mongo/init.js</pre>
+
+<p>Option B restores the submitted dumps. Same tables, but with the sample account
+and its offers and comparisons already in there.</p>
+
+<pre>mysql -h 127.0.0.1 -u joboffers -p job_offers &lt; db/dumps/job_offers_mysql.sql
+mongorestore db/dumps/mongo</pre>
+
+<h2>5. Configure the server</h2>
+
+<pre>cp server/.env.example server/.env</pre>
+
+<p>Nothing in <code>server/.env</code> needs to change if the databases are all local and
+on their default ports. The copied defaults already match step 3.</p>
+
+<table>
+  <tr><th>Setting</th><th>Default</th><th>What it is</th></tr>
+  <tr><td><code>PORT</code></td><td>3000</td><td>Port the application is served on</td></tr>
+  <tr><td><code>MYSQL_HOST</code></td><td>127.0.0.1</td><td>MySQL host</td></tr>
+  <tr><td><code>MYSQL_PORT</code></td><td>3306</td><td>MySQL port</td></tr>
+  <tr><td><code>MYSQL_USER</code></td><td>joboffers</td><td>The user created in step 3</td></tr>
+  <tr><td><code>MYSQL_PASSWORD</code></td><td>hokies2026</td><td>Matches step 3, already set in <code>server/.env.example</code></td></tr>
+  <tr><td><code>MYSQL_DATABASE</code></td><td>job_offers</td><td>Database name</td></tr>
+  <tr><td><code>REDIS_URL</code></td><td>redis://127.0.0.1:6379</td><td>Redis connection</td></tr>
+  <tr><td><code>MONGO_URL</code></td><td>mongodb://127.0.0.1:27017</td><td>MongoDB connection</td></tr>
+  <tr><td><code>MONGO_DATABASE</code></td><td>job_offers</td><td>MongoDB database name</td></tr>
+  <tr><td><code>CLIENT_ORIGIN</code></td><td>http://localhost:5173</td><td>Only used by the development setup in section 9</td></tr>
+</table>
+
+<p><code>server/.env</code> holds a password, so it is not in the repository.</p>
+
+<h2>6. Install the dependencies</h2>
+
+<pre>cd server &amp;&amp; npm install
+cd ../client &amp;&amp; npm install</pre>
+
+<h2>7. Build the front end and start the server</h2>
+
+<pre>cd client &amp;&amp; npm run build
+cd ../server &amp;&amp; npm start</pre>
+
+<p><code>client/dist</code> isn't in the repository, so this step can't be skipped. The
+server serves that folder. The whole app ends up at:</p>
+
+<pre>http://localhost:3000</pre>
+
+<p>On startup the server prints a line for each database it connects to and a line saying
+where the client build was found. If any database is unreachable it says which one and
+stops.</p>
+
+
+</body>
+</html>

@@ -22,3 +22,5 @@ npm-debug.log*
 .DS_Store
 .vscode/
 .idea/
+# Old course setup document, kept locally only
+docs/

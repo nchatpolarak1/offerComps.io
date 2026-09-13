@@ -30,3 +30,6 @@ npm-debug.log*
 
 # Old course setup document, kept locally only
 docs/
+.env*
+# the template is committed though, since the readme says to copy it
+!.env.example

@@ -20,6 +20,30 @@ async function connectAll() {
     }
 }
 
+// opens the three the same way, but reports each one separately instead of stopping
+// at the first failure, so a health check can say which database is the broken one
+async function checkAll() {
+    const names = ['mysql', 'redis', 'mongo'];
+    const results = await Promise.allSettled([
+        mysqlPool.connect(),
+        redisClient.connect(),
+        mongoConnection.connect()
+    ]);
+
+    const report = {};
+    let i = 0;
+    while (i < names.length) {
+        if (results[i].status === 'fulfilled') {
+            report[names[i]] = { ok: true };
+        } else {
+            report[names[i]] = { ok: false, error: results[i].reason.message };
+        }
+        i = i + 1;
+    }
+
+    return report;
+}
+
 async function closeAll() {
     announced = false;
     await mysqlPool.close();
@@ -29,5 +53,6 @@ async function closeAll() {
 
 module.exports = {
     connectAll: connectAll,
+    checkAll: checkAll,
     closeAll: closeAll
 };

@@ -70,6 +70,18 @@ const config = {
     loginAttemptWindowSeconds: LOGIN_ATTEMPT_WINDOW_SECONDS
 };
 
+// vercel only injects VERCEL and VERCEL_ENV when the project is set to expose its
+// system variables, so neither is dependable on its own. the lambda runtime underneath
+// always sets AWS_LAMBDA_FUNCTION_NAME, whatever that setting says
+function isHostedRuntime() {
+    return Boolean(
+        process.env.VERCEL ||
+        process.env.VERCEL_ENV ||
+        process.env.AWS_LAMBDA_FUNCTION_NAME ||
+        process.env.NODE_ENV === 'production'
+    );
+}
+
 function checkRequiredSettings() {
     const missing = [];
 
@@ -85,7 +97,7 @@ function checkRequiredSettings() {
 
     // the redis and mongo defaults point at 127.0.0.1, which is never right on a
     // deployed host, so ask for them there instead of quietly trying localhost
-    if (process.env.VERCEL) {
+    if (isHostedRuntime()) {
         if (!process.env.REDIS_URL) {
             missing.push('REDIS_URL');
         }

@@ -8,9 +8,8 @@ const rateLimitMiddleware = require('../middleware/rateLimitMiddleware');
 
 const router = express.Router();
 
-router.get('/health', function (req, res) {
-    res.json({ status: 'ok' });
-});
+// /api/health is registered in app.js, ahead of the database connect middleware,
+// so that it still answers when one of the databases is down
 
 router.post('/auth/register', authController.register);
 router.post('/auth/login', rateLimitMiddleware.checkLoginAttempts, authController.login);

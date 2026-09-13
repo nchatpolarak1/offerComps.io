@@ -23,7 +23,10 @@ let mysqlSsl;
 if (process.env.MYSQL_CA_CERT) {
     mysqlSsl = { ca: process.env.MYSQL_CA_CERT };
 } else if (process.env.MYSQL_CA_CERT_PATH) {
-    mysqlSsl = { ca: fs.readFileSync(process.env.MYSQL_CA_CERT_PATH, 'utf8') };
+    // resolved against the server directory rather than the working directory, so
+    // the path still finds the file when the process is started from the repo root
+    const certPath = path.resolve(__dirname, '..', '..', process.env.MYSQL_CA_CERT_PATH);
+    mysqlSsl = { ca: fs.readFileSync(certPath, 'utf8') };
 }
 
 // a hosted url carries the password in it, so hide that before it reaches a log

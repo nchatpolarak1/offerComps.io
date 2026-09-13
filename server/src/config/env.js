@@ -83,6 +83,17 @@ function checkRequiredSettings() {
         missing.push('MYSQL_DATABASE');
     }
 
+    // the redis and mongo defaults point at 127.0.0.1, which is never right on a
+    // deployed host, so ask for them there instead of quietly trying localhost
+    if (process.env.VERCEL) {
+        if (!process.env.REDIS_URL) {
+            missing.push('REDIS_URL');
+        }
+        if (!process.env.MONGO_URL) {
+            missing.push('MONGO_URL');
+        }
+    }
+
     if (missing.length > 0) {
         throw new Error(
             'Missing required settings: ' + missing.join(', ') +

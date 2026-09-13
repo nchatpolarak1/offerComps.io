@@ -6,17 +6,30 @@ const config = require('../config/env');
 // without a strategy the client retries forever, so a bad url hangs startup
 // instead of reporting itself. returning an Error stops the retries and lets
 // connect() reject with the message below
-const client = redis.createClient({
-    url: config.redis.url,
-    socket: {
-        reconnectStrategy: function (retries) {
-            if (retries >= 3) {
-                return new Error('Gave up connecting to Redis after ' + retries + ' attempts.');
+function build() {
+    const fresh = redis.createClient({
+        url: config.redis.url,
+        socket: {
+            reconnectStrategy: function (retries) {
+                if (retries >= 3) {
+                    return new Error('Gave up connecting to Redis after ' + retries + ' attempts.');
+                }
+                return Math.min(retries * 200, 1000);
             }
-            return Math.min(retries * 200, 1000);
         }
-    }
-});
+    });
+
+    fresh.on('error', function (error) {
+        console.error('Redis error:', error.message);
+    });
+
+    return fresh;
+}
+
+// replaced whenever the socket is past saving, so the getter below is what callers
+// read rather than holding on to an instance of their own
+let client = build();
+let connectPromise = null;
 
 // a hosted redis listens for TLS only, and the extra s is easy to miss
 function tlsHint() {
@@ -30,13 +43,20 @@ function tlsHint() {
     return '';
 }
 
-let connectPromise = null;
-
-client.on('error', function (error) {
-    console.error('Redis error:', error.message);
-});
-
+// a hosted redis hangs up on an idle connection, and a serverless instance sits idle
+// between requests. once the strategy above gives up, node-redis cannot reopen that
+// socket, so anything short of a new client leaves the instance permanently broken
 async function openConnection() {
+    if (client.isOpen) {
+        try {
+            await client.disconnect();
+        } catch (error) {
+            // already gone, which is the state we wanted anyway
+        }
+    }
+
+    client = build();
+
     try {
         await client.connect();
     } catch (error) {
@@ -48,15 +68,11 @@ async function openConnection() {
     }
 }
 
-// only opens the connection once, however many times it is called
+// only opens the connection once, however many times it is called. isReady rather than
+// isOpen, because a socket part way through reconnecting is open but cannot take commands
 async function connect() {
-    if (client.isOpen) {
+    if (client.isReady) {
         return;
-    }
-
-    // the socket closed after a successful connect, so try again from scratch
-    if (connectPromise !== null && !client.isOpen) {
-        connectPromise = null;
     }
 
     if (connectPromise === null) {
@@ -69,15 +85,23 @@ async function connect() {
         connectPromise = null;
         throw error;
     }
+
+    connectPromise = null;
 }
 
 async function close() {
     connectPromise = null;
-    await client.quit();
+
+    if (client.isOpen) {
+        await client.quit();
+    }
 }
 
 module.exports = {
-    client: client,
+    // a getter, so a caller that took the reference early still reaches the live client
+    get client() {
+        return client;
+    },
     connect: connect,
     close: close
 };

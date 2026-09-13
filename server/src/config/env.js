@@ -39,6 +39,31 @@ function hidePassword(rawUrl) {
     }
 }
 
+// vercel only injects VERCEL and VERCEL_ENV when the project is set to expose its
+// system variables, so neither is dependable on its own. the lambda runtime underneath
+// always sets AWS_LAMBDA_FUNCTION_NAME, whatever that setting says
+function isHostedRuntime() {
+    return Boolean(
+        process.env.VERCEL ||
+        process.env.VERCEL_ENV ||
+        process.env.AWS_LAMBDA_FUNCTION_NAME ||
+        process.env.NODE_ENV === 'production'
+    );
+}
+
+// one long running server shares a single pool, but a host runs many instances that
+// each hold their own, and a free tier database allows only a couple of dozen
+// connections across all of them. so a host gets a much smaller pool by default
+const DEFAULT_POOL_SIZE = 10;
+const HOSTED_POOL_SIZE = 2;
+
+function defaultConnectionLimit() {
+    if (isHostedRuntime()) {
+        return HOSTED_POOL_SIZE;
+    }
+    return DEFAULT_POOL_SIZE;
+}
+
 const config = {
     port: Number(process.env.PORT) || 3000,
     clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
@@ -50,7 +75,7 @@ const config = {
         password: process.env.MYSQL_PASSWORD,
         database: process.env.MYSQL_DATABASE,
         ssl: mysqlSsl,
-        connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT) || 10
+        connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT) || defaultConnectionLimit()
     },
 
     redis: {
@@ -69,18 +94,6 @@ const config = {
     loginAttemptLimit: LOGIN_ATTEMPT_LIMIT,
     loginAttemptWindowSeconds: LOGIN_ATTEMPT_WINDOW_SECONDS
 };
-
-// vercel only injects VERCEL and VERCEL_ENV when the project is set to expose its
-// system variables, so neither is dependable on its own. the lambda runtime underneath
-// always sets AWS_LAMBDA_FUNCTION_NAME, whatever that setting says
-function isHostedRuntime() {
-    return Boolean(
-        process.env.VERCEL ||
-        process.env.VERCEL_ENV ||
-        process.env.AWS_LAMBDA_FUNCTION_NAME ||
-        process.env.NODE_ENV === 'production'
-    );
-}
 
 function checkRequiredSettings() {
     const missing = [];

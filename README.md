@@ -5,6 +5,9 @@ offers they have received, sets weight sliders for what matters to them (pay,
 commute, hours, flexibility), and the application scores and ranks the offers
 side by side after adjusting for taxes and cost of living.
 
+**Live at <https://offercomps-io-opal.vercel.app>.** `/api/health` reports whether the
+MySQL, Redis and MongoDB connections are up, and names the one at fault if any is down.
+
 ## Technologies
 
 | Layer | Technology |

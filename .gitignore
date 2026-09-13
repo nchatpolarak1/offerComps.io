@@ -22,5 +22,11 @@ npm-debug.log*
 .DS_Store
 .vscode/
 .idea/
+
+# Editor swap files, which can hold a copy of whatever was open
+*.swp
+*.swo
+*~
+
 # Old course setup document, kept locally only
 docs/

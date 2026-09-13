@@ -85,8 +85,9 @@ function checkRequiredSettings() {
 
     if (missing.length > 0) {
         throw new Error(
-            'Missing required settings in server/.env: ' + missing.join(', ') +
-            '. Copy server/.env.example to server/.env and fill it in.'
+            'Missing required settings: ' + missing.join(', ') +
+            '. Set them in server/.env when running locally, or as environment ' +
+            'variables on the host when deployed.'
         );
     }
 }

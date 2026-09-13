@@ -8,9 +8,9 @@
     "client"
   ],
   "scripts": {
-    "build": "npm run build --workspace client",
-    "start": "npm run start --workspace server",
-    "dev": "npm run dev --workspace server"
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "dev": "cd server && npm run dev"
   },
   "author": "Nathan Chatpolarak",
   "license": "ISC"
